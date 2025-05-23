@@ -18,12 +18,14 @@ function elements.createTabHandler(tabContainer, pageContainer)
         tab.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
         tab.BackgroundTransparency = 0.1;
         tab.BorderSizePixel = 0;
-        tab.Size = UDim2.new(1, 0, 0, 30); -- Full width
+        tab.Size = UDim2.new(1, -2, 0, 30);
+        tab.Position = UDim2.new(0, 1, 0, 0);
         tab.Font = Enum.Font.GothamBold;
         tab.Text = name;
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
         tab.TextSize = 12;
         tab.AutoButtonColor = false;
+        tab.ZIndex = 3;
         
         -- Page setup
         page.Name = name;
@@ -34,6 +36,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
         page.CanvasSize = UDim2.new(0, 0, 0, 0);
         page.ScrollBarThickness = 2;
         page.Visible = firstTab;
+        page.ZIndex = 2;
         
         -- List layout for page content
         list.Parent = page;
@@ -85,6 +88,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             button.TextColor3 = Color3.fromRGB(255, 255, 255);
             button.TextSize = 12;
             button.AutoButtonColor = false;
+            button.ZIndex = 2;
             
             button.MouseEnter:Connect(function()
                 ts:Create(button, TweenInfo.new(0.2), {
@@ -113,6 +117,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             sep.Parent = page;
             sep.BackgroundTransparency = 1;
             sep.Size = UDim2.new(1, -10, 0, 20);
+            sep.ZIndex = 2;
             
             label.Parent = sep;
             label.BackgroundTransparency = 1;
@@ -122,12 +127,14 @@ function elements.createTabHandler(tabContainer, pageContainer)
             label.Text = text or "•";
             label.TextColor3 = Color3.fromRGB(255, 255, 255);
             label.TextSize = 12;
+            label.ZIndex = 2;
             
             right.Parent = sep;
             right.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
             right.BorderSizePixel = 0;
             right.Position = UDim2.new(0, 10, 0.5, 0);
             right.Size = UDim2.new(1, -140, 0, 1);
+            right.ZIndex = 2;
             
             rightGrad.Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
