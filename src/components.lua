@@ -10,15 +10,14 @@ local components = {};
 function components.createWindow(title)
     local gui = Instance.new("ScreenGui");
     local main = Instance.new("Frame");
-    local maingrad = Instance.new("UIGradient");
     local top = Instance.new("Frame");
-    local topgrad = Instance.new("UIGradient");
     local topsep = Instance.new("Frame");
+    local topsepgrad = Instance.new("UIGradient");
     local ttl = Instance.new("TextLabel");
     local tabs = Instance.new("Frame");
-    local tabsgrad = Instance.new("UIGradient");
     local tablist = Instance.new("UIListLayout");
     local tabsep = Instance.new("Frame");
+    local tabsepgrad = Instance.new("UIGradient");
     local pages = Instance.new("Frame");
     local close = Instance.new("TextButton");
     
@@ -27,36 +26,39 @@ function components.createWindow(title)
     
     main.Name = "main";
     main.Parent = gui;
-    main.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+    main.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
     main.BorderSizePixel = 0;
     main.Position = UDim2.new(0.5, -200, 0.5, -150);
     main.Size = UDim2.new(0, 400, 0, 300);
     main.ClipsDescendants = true;
     
-    maingrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 20)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 25))
-    });
-    maingrad.Parent = main;
-    
     top.Name = "top";
     top.Parent = main;
-    top.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+    top.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
     top.BorderSizePixel = 0;
     top.Size = UDim2.new(1, 0, 0, 30);
     
-    topgrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 25, 35))
-    });
-    topgrad.Parent = top;
-    
     topsep.Name = "topsep";
     topsep.Parent = top;
-    topsep.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
+    topsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     topsep.BorderSizePixel = 0;
     topsep.Position = UDim2.new(0, 0, 1, 0);
     topsep.Size = UDim2.new(1, 0, 0, 1);
+    
+    topsepgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+    });
+    topsepgrad.Parent = topsep;
+    
+    -- Animate the gradient
+    local offset = 0;
+    rs.RenderStepped:Connect(function(delta)
+        offset = (offset + delta * 0.1) % 1;
+        topsepgrad.Offset = Vector2.new(offset, 0);
+        tabsepgrad.Offset = Vector2.new(offset, 0);
+    end);
     
     ttl.Name = "title";
     ttl.Parent = top;
@@ -81,16 +83,10 @@ function components.createWindow(title)
     
     tabs.Name = "tabs";
     tabs.Parent = main;
-    tabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+    tabs.BackgroundColor3 = Color3.fromRGB(5, 5, 5);
     tabs.BorderSizePixel = 0;
     tabs.Position = UDim2.new(0, 0, 0, 31);
     tabs.Size = UDim2.new(0, 100, 1, -31);
-    
-    tabsgrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 25)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 20, 30))
-    });
-    tabsgrad.Parent = tabs;
     
     tablist.Parent = tabs;
     tablist.SortOrder = Enum.SortOrder.LayoutOrder;
@@ -98,77 +94,24 @@ function components.createWindow(title)
     
     tabsep.Name = "tabsep";
     tabsep.Parent = tabs;
-    tabsep.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
+    tabsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     tabsep.BorderSizePixel = 0;
     tabsep.Position = UDim2.new(1, 0, 0, 0);
     tabsep.Size = UDim2.new(0, 1, 1, 0);
+    
+    tabsepgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+    });
+    tabsepgrad.Parent = tabsep;
+    tabsepgrad.Rotation = 90;
     
     pages.Name = "pages";
     pages.Parent = main;
     pages.BackgroundTransparency = 1;
     pages.Position = UDim2.new(0, 110, 0, 40);
     pages.Size = UDim2.new(1, -120, 1, -50);
-    
-    -- Animated gradients
-    local gradients = {maingrad, topgrad, tabsgrad};
-    local gradientInfo = {
-        {
-            colors = {
-                Color3.fromRGB(15, 15, 20),
-                Color3.fromRGB(20, 20, 25)
-            }
-        },
-        {
-            colors = {
-                Color3.fromRGB(25, 25, 30),
-                Color3.fromRGB(30, 25, 35)
-            }
-        },
-        {
-            colors = {
-                Color3.fromRGB(20, 20, 25),
-                Color3.fromRGB(25, 20, 30)
-            }
-        }
-    };
-
-    local function lerpColor(c1, c2, t)
-        return Color3.new(
-            c1.R + (c2.R - c1.R) * t,
-            c1.G + (c2.G - c1.G) * t,
-            c1.B + (c2.B - c1.B) * t
-        );
-    end;
-
-    local gradientColors = {
-        Color3.fromRGB(60, 20, 80),  -- Dark purple
-        Color3.fromRGB(100, 50, 150), -- Purple
-        Color3.fromRGB(80, 20, 100),  -- Deep purple
-        Color3.fromRGB(40, 20, 60)    -- Very dark purple
-    };
-    
-    local colorIndex = 1;
-    local lerpValue = 0;
-    
-    rs.RenderStepped:Connect(function(delta)
-        lerpValue = lerpValue + delta * 0.5;
-        
-        if lerpValue >= 1 then
-            lerpValue = 0;
-            colorIndex = (colorIndex % #gradientColors) + 1;
-        end;
-        
-        local currentColor = gradientColors[colorIndex];
-        local nextColor = gradientColors[colorIndex % #gradientColors + 1];
-        local lerpedColor = lerpColor(currentColor, nextColor, lerpValue);
-        
-        for i, grad in ipairs(gradients) do
-            grad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, gradientInfo[i].colors[1]:Lerp(lerpedColor, 0.1)),
-                ColorSequenceKeypoint.new(1, gradientInfo[i].colors[2]:Lerp(lerpedColor, 0.2))
-            });
-        end;
-    end);
     
     utils.makeDraggable(main, top);
     
