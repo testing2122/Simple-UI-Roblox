@@ -99,6 +99,8 @@ function components.createWindow(title)
     tabList.Parent = tabsContainer;
     tabList.SortOrder = Enum.SortOrder.LayoutOrder;
     tabList.Padding = UDim.new(0, 2);
+    tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left;
+    tabList.VerticalAlignment = Enum.VerticalAlignment.Top;
     
     contentContainer.Name = "content";
     contentContainer.Parent = main;
@@ -122,12 +124,15 @@ function components.createWindow(title)
     
     local win = {};
     local firstTab = true;
+    local tabCount = 0;
     
     function win:tab(name)
         local tab = Instance.new("TextButton");
         local page = Instance.new("ScrollingFrame");
         local pageList = Instance.new("UIListLayout");
         local pagePadding = Instance.new("UIPadding");
+        
+        tabCount = tabCount + 1;
         
         tab.Name = name;
         tab.Parent = tabsContainer;
@@ -139,6 +144,7 @@ function components.createWindow(title)
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
         tab.TextSize = 12;
         tab.AutoButtonColor = false;
+        tab.LayoutOrder = tabCount;
         
         page.Name = name;
         page.Parent = contentContainer;
@@ -159,6 +165,8 @@ function components.createWindow(title)
         pageList.Parent = page;
         pageList.SortOrder = Enum.SortOrder.LayoutOrder;
         pageList.Padding = UDim.new(0, 8);
+        pageList.HorizontalAlignment = Enum.HorizontalAlignment.Left;
+        pageList.VerticalAlignment = Enum.VerticalAlignment.Top;
         
         tab.MouseButton1Click:Connect(function()
             for _, v in ipairs(contentContainer:GetChildren()) do
