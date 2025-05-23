@@ -12,19 +12,20 @@ function elements.createTabHandler(tabContainer, pageContainer)
         local page = Instance.new("ScrollingFrame");
         local list = Instance.new("UIListLayout");
         
+        -- Tab button setup
         tab.Name = name;
         tab.Parent = tabContainer;
         tab.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
         tab.BackgroundTransparency = 0.1;
         tab.BorderSizePixel = 0;
-        tab.Size = UDim2.new(1, -10, 0, 30); -- Added -10 to keep tabs inside container
-        tab.Position = UDim2.new(0, 5, 0, 0); -- Added 5 pixel padding
+        tab.Size = UDim2.new(1, 0, 0, 30); -- Full width
         tab.Font = Enum.Font.GothamBold;
         tab.Text = name;
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
         tab.TextSize = 12;
         tab.AutoButtonColor = false;
         
+        -- Page setup
         page.Name = name;
         page.Parent = pageContainer;
         page.BackgroundTransparency = 1;
@@ -34,6 +35,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
         page.ScrollBarThickness = 2;
         page.Visible = firstTab;
         
+        -- List layout for page content
         list.Parent = page;
         list.SortOrder = Enum.SortOrder.LayoutOrder;
         list.Padding = UDim.new(0, 5);
@@ -114,7 +116,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             
             label.Parent = sep;
             label.BackgroundTransparency = 1;
-            label.Position = UDim2.new(1, -120, 0, 0); -- Moved to right side
+            label.Position = UDim2.new(1, -120, 0, 0);
             label.Size = UDim2.new(0, 100, 1, 0);
             label.Font = Enum.Font.GothamBold;
             label.Text = text or "•";
@@ -124,8 +126,8 @@ function elements.createTabHandler(tabContainer, pageContainer)
             right.Parent = sep;
             right.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
             right.BorderSizePixel = 0;
-            right.Position = UDim2.new(0, 10, 0.5, 0); -- Adjusted position
-            right.Size = UDim2.new(1, -140, 0, 1); -- Adjusted size
+            right.Position = UDim2.new(0, 10, 0.5, 0);
+            right.Size = UDim2.new(1, -140, 0, 1);
             
             rightGrad.Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
