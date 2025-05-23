@@ -70,18 +70,11 @@ function components.createWindow(title)
     close.TextColor3 = Color3.fromRGB(255, 255, 255);
     close.TextSize = 14;
     
-    contentContainer.Name = "content";
-    contentContainer.Parent = main;
-    contentContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20);
-    contentContainer.BorderSizePixel = 0;
-    contentContainer.Position = UDim2.new(0, 100, 0, 31);
-    contentContainer.Size = UDim2.new(1, -100, 1, -31);
-    
     tabsContainer.Name = "tabs";
-    tabsContainer.Parent = contentContainer;
+    tabsContainer.Parent = main;
     tabsContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25);
     tabsContainer.BorderSizePixel = 0;
-    tabsContainer.Position = UDim2.new(0, -100, 0, 0);
+    tabsContainer.Position = UDim2.new(0, 0, 0, 31);
     tabsContainer.Size = UDim2.new(0, 100, 0, 269);
     tabsContainer.ClipsDescendants = true;
     
@@ -109,6 +102,13 @@ function components.createWindow(title)
     tabList.Padding = UDim.new(0, 2);
     tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left;
     tabList.VerticalAlignment = Enum.VerticalAlignment.Top;
+    
+    contentContainer.Name = "content";
+    contentContainer.Parent = main;
+    contentContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20);
+    contentContainer.BorderSizePixel = 0;
+    contentContainer.Position = UDim2.new(0, 100, 0, 31);
+    contentContainer.Size = UDim2.new(1, -100, 1, -31);
     
     local offset = 0;
     rs.RenderStepped:Connect(function(delta)
