@@ -80,23 +80,29 @@ function components.createWindow(title)
     close.TextColor3 = Color3.fromRGB(255, 255, 255);
     close.TextSize = 14;
     
+    -- Tab container setup
     tabs.Name = "tabs";
     tabs.Parent = main;
     tabs.BackgroundColor3 = Color3.fromRGB(5, 5, 5);
     tabs.BorderSizePixel = 0;
     tabs.Position = UDim2.new(0, 0, 0, 31);
-    tabs.Size = UDim2.new(0, 120, 1, -31); -- Increased width to 120
+    tabs.Size = UDim2.new(0, 100, 1, -31);
+    tabs.ClipsDescendants = true;
     
+    -- Tab list layout
     tablist.Parent = tabs;
     tablist.SortOrder = Enum.SortOrder.LayoutOrder;
-    tablist.Padding = UDim.new(0, 1); -- Added small padding between tabs
+    tablist.HorizontalAlignment = Enum.HorizontalAlignment.Left;
+    tablist.VerticalAlignment = Enum.VerticalAlignment.Top;
     
+    -- Tab separator
     tabsep.Name = "tabsep";
     tabsep.Parent = tabs;
     tabsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     tabsep.BorderSizePixel = 0;
     tabsep.Position = UDim2.new(1, 0, 0, 0);
     tabsep.Size = UDim2.new(0, 1, 1, 0);
+    tabsep.ZIndex = 2;
     
     tabsepgrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
@@ -106,11 +112,12 @@ function components.createWindow(title)
     tabsepgrad.Parent = tabsep;
     tabsepgrad.Rotation = 90;
     
+    -- Content pages setup
     pages.Name = "pages";
     pages.Parent = main;
     pages.BackgroundTransparency = 1;
-    pages.Position = UDim2.new(0, 130, 0, 40); -- Adjusted for wider tabs
-    pages.Size = UDim2.new(1, -140, 1, -50); -- Adjusted for wider tabs
+    pages.Position = UDim2.new(0, 110, 0, 40);
+    pages.Size = UDim2.new(1, -120, 1, -50);
     
     utils.makeDraggable(main, top);
     
