@@ -9,10 +9,15 @@ local components = {};
 function components.createWindow(title)
     local gui = Instance.new("ScreenGui");
     local main = Instance.new("Frame");
+    local maingrad = Instance.new("UIGradient");
     local top = Instance.new("Frame");
+    local topgrad = Instance.new("UIGradient");
+    local topsep = Instance.new("Frame");
     local ttl = Instance.new("TextLabel");
     local tabs = Instance.new("Frame");
+    local tabsgrad = Instance.new("UIGradient");
     local tablist = Instance.new("UIListLayout");
+    local tabsep = Instance.new("Frame");
     local pages = Instance.new("Frame");
     local close = Instance.new("TextButton");
     
@@ -21,16 +26,35 @@ function components.createWindow(title)
     
     main.Name = "main";
     main.Parent = gui;
-    main.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+    main.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     main.BorderSizePixel = 0;
     main.Position = UDim2.new(0.5, -200, 0.5, -150);
     main.Size = UDim2.new(0, 400, 0, 300);
     
+    maingrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 20)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 25))
+    });
+    maingrad.Parent = main;
+    
     top.Name = "top";
     top.Parent = main;
-    top.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
+    top.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     top.BorderSizePixel = 0;
     top.Size = UDim2.new(1, 0, 0, 30);
+    
+    topgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 25, 35))
+    });
+    topgrad.Parent = top;
+    
+    topsep.Name = "topsep";
+    topsep.Parent = top;
+    topsep.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
+    topsep.BorderSizePixel = 0;
+    topsep.Position = UDim2.new(0, 0, 1, 0);
+    topsep.Size = UDim2.new(1, 0, 0, 1);
     
     ttl.Name = "title";
     ttl.Parent = top;
@@ -53,14 +77,27 @@ function components.createWindow(title)
     
     tabs.Name = "tabs";
     tabs.Parent = main;
-    tabs.BackgroundColor3 = Color3.fromRGB(35, 35, 35);
+    tabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     tabs.BorderSizePixel = 0;
     tabs.Position = UDim2.new(0, 0, 0, 30);
     tabs.Size = UDim2.new(0, 100, 1, -30);
     
+    tabsgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 25)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 20, 30))
+    });
+    tabsgrad.Parent = tabs;
+    
     tablist.Parent = tabs;
     tablist.SortOrder = Enum.SortOrder.LayoutOrder;
-    tablist.Padding = UDim.new(0, 2);
+    tablist.Padding = UDim.new(0, 0);
+    
+    tabsep.Name = "tabsep";
+    tabsep.Parent = tabs;
+    tabsep.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
+    tabsep.BorderSizePixel = 0;
+    tabsep.Position = UDim2.new(1, 0, 0, 0);
+    tabsep.Size = UDim2.new(0, 1, 1, 0);
     
     pages.Name = "pages";
     pages.Parent = main;
