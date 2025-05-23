@@ -76,6 +76,45 @@ function elements.createTabHandler(tabContainer, pageContainer)
             
             return btn;
         end;
+
+        function tabContent:sep(txt)
+            local sep = Instance.new("Frame");
+            local line1 = Instance.new("Frame");
+            local line2 = Instance.new("Frame");
+            local lbl = Instance.new("TextLabel");
+            
+            sep.Name = "separator";
+            sep.Parent = page;
+            sep.BackgroundTransparency = 1;
+            sep.Size = UDim2.new(1, -10, 0, 20);
+            sep.Position = UDim2.new(0, 5, 0, 0);
+            
+            line1.Name = "line1";
+            line1.Parent = sep;
+            line1.BackgroundColor3 = Color3.fromRGB(60, 60, 60);
+            line1.BorderSizePixel = 0;
+            line1.Position = UDim2.new(0, 0, 0.5, 0);
+            line1.Size = UDim2.new(0.5, -13, 0, 1);
+            
+            lbl.Name = "text";
+            lbl.Parent = sep;
+            lbl.BackgroundTransparency = 1;
+            lbl.Position = UDim2.new(0.5, -10, 0, 0);
+            lbl.Size = UDim2.new(0, 20, 1, 0);
+            lbl.Font = Enum.Font.Gotham;
+            lbl.Text = txt or "•";
+            lbl.TextColor3 = Color3.fromRGB(120, 120, 120);
+            lbl.TextSize = 12;
+            
+            line2.Name = "line2";
+            line2.Parent = sep;
+            line2.BackgroundColor3 = Color3.fromRGB(60, 60, 60);
+            line2.BorderSizePixel = 0;
+            line2.Position = UDim2.new(0.5, 13, 0.5, 0);
+            line2.Size = UDim2.new(0.5, -13, 0, 1);
+            
+            return sep;
+        end;
         
         return tabContent;
     end;
