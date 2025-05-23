@@ -52,7 +52,6 @@ function components.createWindow(title)
     });
     topsepgrad.Parent = topsep;
     
-    -- Animate the gradient
     local offset = 0;
     rs.RenderStepped:Connect(function(delta)
         offset = (offset + delta * 0.1) % 1;
@@ -119,7 +118,8 @@ function components.createWindow(title)
         gui:Destroy();
     end);
     
-    return elements.createTabHandler(tabs, pages);
+    local win = elements.createTabHandler(tabs, pages);
+    return win;
 end;
 
 return components;
