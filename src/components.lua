@@ -85,11 +85,11 @@ function components.createWindow(title)
     tabs.BackgroundColor3 = Color3.fromRGB(5, 5, 5);
     tabs.BorderSizePixel = 0;
     tabs.Position = UDim2.new(0, 0, 0, 31);
-    tabs.Size = UDim2.new(0, 100, 1, -31);
+    tabs.Size = UDim2.new(0, 120, 1, -31); -- Increased width to 120
     
     tablist.Parent = tabs;
     tablist.SortOrder = Enum.SortOrder.LayoutOrder;
-    tablist.Padding = UDim.new(0, 0);
+    tablist.Padding = UDim.new(0, 1); -- Added small padding between tabs
     
     tabsep.Name = "tabsep";
     tabsep.Parent = tabs;
@@ -109,8 +109,8 @@ function components.createWindow(title)
     pages.Name = "pages";
     pages.Parent = main;
     pages.BackgroundTransparency = 1;
-    pages.Position = UDim2.new(0, 110, 0, 40);
-    pages.Size = UDim2.new(1, -120, 1, -50);
+    pages.Position = UDim2.new(0, 130, 0, 40); -- Adjusted for wider tabs
+    pages.Size = UDim2.new(1, -140, 1, -50); -- Adjusted for wider tabs
     
     utils.makeDraggable(main, top);
     
