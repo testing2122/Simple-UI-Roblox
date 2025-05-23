@@ -32,7 +32,6 @@ function components.createWindow(title)
     top.BorderSizePixel = 0;
     top.Size = UDim2.new(1, 0, 0, 30);
     
-    -- Top separator with gradient
     local topsep = Instance.new("Frame");
     local topsepgrad = Instance.new("UIGradient");
     
@@ -78,7 +77,6 @@ function components.createWindow(title)
     tabsContainer.Position = UDim2.new(0, 0, 0, 31);
     tabsContainer.Size = UDim2.new(0, 100, 1, -31);
     
-    -- Tab container separator with gradient
     local tabsep = Instance.new("Frame");
     local tabsepgrad = Instance.new("UIGradient");
     
@@ -109,7 +107,6 @@ function components.createWindow(title)
     contentContainer.Position = UDim2.new(0, 100, 0, 31);
     contentContainer.Size = UDim2.new(1, -100, 1, -31);
     
-    -- Animate gradients
     local offset = 0;
     rs.RenderStepped:Connect(function(delta)
         offset = (offset + delta * 0.1) % 1;
@@ -134,7 +131,7 @@ function components.createWindow(title)
         
         tab.Name = name;
         tab.Parent = tabsContainer;
-        tab.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+        tab.BackgroundColor3 = firstTab and Color3.fromRGB(40, 40, 40) or Color3.fromRGB(30, 30, 30);
         tab.BorderSizePixel = 0;
         tab.Size = UDim2.new(1, 0, 0, 30);
         tab.Font = Enum.Font.GothamBold;
@@ -151,6 +148,8 @@ function components.createWindow(title)
         page.CanvasSize = UDim2.new(0, 0, 0, 0);
         page.ScrollBarThickness = 2;
         page.Visible = firstTab;
+        page.ScrollingEnabled = true;
+        page.AutomaticCanvasSize = Enum.AutomaticSize.Y;
         
         pagePadding.Parent = page;
         pagePadding.PaddingLeft = UDim.new(0, 10);
@@ -161,26 +160,18 @@ function components.createWindow(title)
         pageList.SortOrder = Enum.SortOrder.LayoutOrder;
         pageList.Padding = UDim.new(0, 8);
         
-        if firstTab then
-            tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
-            firstTab = false;
-        end
-        
         tab.MouseButton1Click:Connect(function()
-            for _, v in pairs(contentContainer:GetChildren()) do
+            for _, v in ipairs(contentContainer:GetChildren()) do
                 if v:IsA("ScrollingFrame") then
-                    v.Visible = false;
+                    v.Visible = v.Name == name;
                 end
             end
             
-            for _, v in pairs(tabsContainer:GetChildren()) do
+            for _, v in ipairs(tabsContainer:GetChildren()) do
                 if v:IsA("TextButton") then
-                    v.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+                    v.BackgroundColor3 = v.Name == name and Color3.fromRGB(40, 40, 40) or Color3.fromRGB(30, 30, 30);
                 end
             end
-            
-            page.Visible = true;
-            tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
         end);
         
         local tabContent = {};
@@ -255,7 +246,6 @@ function components.createWindow(title)
             label.TextColor3 = Color3.fromRGB(255, 255, 255);
             label.TextSize = 12;
             
-            -- Animate gradient
             local offset = 0;
             rs.RenderStepped:Connect(function(delta)
                 offset = (offset + delta * 0.1) % 1;
@@ -266,8 +256,12 @@ function components.createWindow(title)
         end;
         
         pageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            page.CanvasSize = UDim2.new(0, 0, 0, pageList.AbsoluteContentSize.Y);
+            page.CanvasSize = UDim2.new(0, 0, 0, pageList.AbsoluteContentSize.Y + 20);
         end);
+        
+        if firstTab then
+            firstTab = false;
+        end
         
         return tabContent;
     end;
