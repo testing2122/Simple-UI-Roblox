@@ -1,4 +1,5 @@
 local ts = game:GetService("TweenService");
+local rs = game:GetService("RunService");
 
 local elements = {};
 
@@ -36,6 +37,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
         btmsep.BorderSizePixel = 0;
         btmsep.Position = UDim2.new(0, 0, 1, 0);
         btmsep.Size = UDim2.new(1, 0, 0, 1);
+        btmsep.BackgroundTransparency = 0.5;
         
         page.Name = name;
         page.Parent = pageContainer;
@@ -55,6 +57,46 @@ function elements.createTabHandler(tabContainer, pageContainer)
             firstTab = false;
         end;
         
+        -- Animated gradient for active tab
+        local gradientColors = {
+            Color3.fromRGB(60, 20, 80),  -- Dark purple
+            Color3.fromRGB(100, 50, 150), -- Purple
+            Color3.fromRGB(80, 20, 100),  -- Deep purple
+            Color3.fromRGB(40, 20, 60)    -- Very dark purple
+        };
+        
+        local colorIndex = 1;
+        local lerpValue = 0;
+        local isActive = firstTab;
+        
+        local function lerpColor(c1, c2, t)
+            return Color3.new(
+                c1.R + (c2.R - c1.R) * t,
+                c1.G + (c2.G - c1.G) * t,
+                c1.B + (c2.B - c1.B) * t
+            );
+        end;
+        
+        rs.RenderStepped:Connect(function(delta)
+            if not isActive then return end;
+            
+            lerpValue = lerpValue + delta * 0.5;
+            
+            if lerpValue >= 1 then
+                lerpValue = 0;
+                colorIndex = (colorIndex % #gradientColors) + 1;
+            end;
+            
+            local currentColor = gradientColors[colorIndex];
+            local nextColor = gradientColors[colorIndex % #gradientColors + 1];
+            local lerpedColor = lerpColor(currentColor, nextColor, lerpValue);
+            
+            tabgrad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 30, 40):Lerp(lerpedColor, 0.2)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 35, 45):Lerp(lerpedColor, 0.3))
+            });
+        end);
+        
         tab.MouseButton1Click:Connect(function()
             for _, v in pairs(pageContainer:GetChildren()) do
                 v.Visible = false;
@@ -62,22 +104,23 @@ function elements.createTabHandler(tabContainer, pageContainer)
             
             for _, v in pairs(tabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
+                    v.TextColor3 = Color3.fromRGB(255, 255, 255);
                     ts:Create(v:FindFirstChild("UIGradient"), TweenInfo.new(0.16), {
                         Color = ColorSequence.new({
                             ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
                             ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 25, 35))
                         })
                     }):Play();
+                    if v ~= tab then
+                        v.Name = v.Name:gsub("_active", "");
+                    end
                 end;
             end;
             
             page.Visible = true;
-            ts:Create(tabgrad, TweenInfo.new(0.16), {
-                Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 30, 40)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 35, 45))
-                })
-            }):Play();
+            tab.TextColor3 = Color3.fromRGB(255, 255, 255);
+            tab.Name = tab.Name .. "_active";
+            isActive = true;
         end);
         
         local tabContent = {};
@@ -91,11 +134,11 @@ function elements.createTabHandler(tabContainer, pageContainer)
             btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
             btn.BorderSizePixel = 0;
             btn.Size = UDim2.new(1, -10, 0, 30);
-            btn.Position = UDim2.new(0, 5, 0, 0);
             btn.Font = Enum.Font.Gotham;
-            btn.Text = txt;
+            btn.Text = "  " .. txt;
             btn.TextColor3 = Color3.fromRGB(255, 255, 255);
             btn.TextSize = 14;
+            btn.TextXAlignment = Enum.TextXAlignment.Left;
             
             btngrad.Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 25, 35)),
@@ -133,7 +176,6 @@ function elements.createTabHandler(tabContainer, pageContainer)
             sep.Parent = page;
             sep.BackgroundTransparency = 1;
             sep.Size = UDim2.new(1, -10, 0, 20);
-            sep.Position = UDim2.new(0, 5, 0, 0);
             
             line1.Name = "line1";
             line1.Parent = sep;
@@ -141,6 +183,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             line1.BorderSizePixel = 0;
             line1.Position = UDim2.new(0, 0, 0.5, 0);
             line1.Size = UDim2.new(0.5, -13, 0, 1);
+            line1.BackgroundTransparency = 0.5;
             
             lbl.Name = "text";
             lbl.Parent = sep;
@@ -149,7 +192,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             lbl.Size = UDim2.new(0, 20, 1, 0);
             lbl.Font = Enum.Font.Gotham;
             lbl.Text = txt or "•";
-            lbl.TextColor3 = Color3.fromRGB(100, 50, 150);
+            lbl.TextColor3 = Color3.fromRGB(255, 255, 255);
             lbl.TextSize = 12;
             
             line2.Name = "line2";
@@ -158,6 +201,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
             line2.BorderSizePixel = 0;
             line2.Position = UDim2.new(0.5, 13, 0.5, 0);
             line2.Size = UDim2.new(0.5, -13, 0, 1);
+            line2.BackgroundTransparency = 0.5;
             
             return sep;
         end;
