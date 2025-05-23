@@ -21,8 +21,13 @@ function components.createWindow(title)
     local pages = Instance.new("Frame");
     local close = Instance.new("TextButton");
     
+    if syn then
+        syn.protect_gui(gui);
+    end
+    
     gui.Name = "simpleUI";
     gui.Parent = game:GetService("CoreGui");
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
     
     main.Name = "main";
     main.Parent = gui;
@@ -31,12 +36,14 @@ function components.createWindow(title)
     main.Position = UDim2.new(0.5, -200, 0.5, -150);
     main.Size = UDim2.new(0, 400, 0, 300);
     main.ClipsDescendants = true;
+    main.ZIndex = 2;
     
     top.Name = "top";
     top.Parent = main;
     top.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
     top.BorderSizePixel = 0;
     top.Size = UDim2.new(1, 0, 0, 30);
+    top.ZIndex = 3;
     
     topsep.Name = "topsep";
     topsep.Parent = top;
@@ -44,6 +51,7 @@ function components.createWindow(title)
     topsep.BorderSizePixel = 0;
     topsep.Position = UDim2.new(0, 0, 1, 0);
     topsep.Size = UDim2.new(1, 0, 0, 1);
+    topsep.ZIndex = 4;
     
     topsepgrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
@@ -69,6 +77,7 @@ function components.createWindow(title)
     ttl.TextSize = 14;
     ttl.TextXAlignment = Enum.TextXAlignment.Left;
     ttl.Position = UDim2.new(0, 10, 0, 0);
+    ttl.ZIndex = 3;
     
     close.Name = "close";
     close.Parent = top;
@@ -79,6 +88,7 @@ function components.createWindow(title)
     close.Text = "X";
     close.TextColor3 = Color3.fromRGB(255, 255, 255);
     close.TextSize = 14;
+    close.ZIndex = 3;
     
     -- Tab container setup
     tabs.Name = "tabs";
@@ -86,23 +96,24 @@ function components.createWindow(title)
     tabs.BackgroundColor3 = Color3.fromRGB(5, 5, 5);
     tabs.BorderSizePixel = 0;
     tabs.Position = UDim2.new(0, 0, 0, 31);
-    tabs.Size = UDim2.new(0, 100, 1, -31);
+    tabs.Size = UDim2.new(0, 120, 1, -31);
     tabs.ClipsDescendants = true;
+    tabs.ZIndex = 2;
     
     -- Tab list layout
     tablist.Parent = tabs;
     tablist.SortOrder = Enum.SortOrder.LayoutOrder;
     tablist.HorizontalAlignment = Enum.HorizontalAlignment.Left;
-    tablist.VerticalAlignment = Enum.VerticalAlignment.Top;
+    tablist.Padding = UDim.new(0, 1);
     
     -- Tab separator
     tabsep.Name = "tabsep";
     tabsep.Parent = tabs;
     tabsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
     tabsep.BorderSizePixel = 0;
-    tabsep.Position = UDim2.new(1, 0, 0, 0);
+    tabsep.Position = UDim2.new(1, -1, 0, 0);
     tabsep.Size = UDim2.new(0, 1, 1, 0);
-    tabsep.ZIndex = 2;
+    tabsep.ZIndex = 4;
     
     tabsepgrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
@@ -116,8 +127,9 @@ function components.createWindow(title)
     pages.Name = "pages";
     pages.Parent = main;
     pages.BackgroundTransparency = 1;
-    pages.Position = UDim2.new(0, 110, 0, 40);
-    pages.Size = UDim2.new(1, -120, 1, -50);
+    pages.Position = UDim2.new(0, 130, 0, 40);
+    pages.Size = UDim2.new(1, -140, 1, -50);
+    pages.ZIndex = 2;
     
     utils.makeDraggable(main, top);
     
