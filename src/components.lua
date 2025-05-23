@@ -32,6 +32,24 @@ function components.createWindow(title)
     top.BorderSizePixel = 0;
     top.Size = UDim2.new(1, 0, 0, 30);
     
+    -- Top separator with gradient
+    local topsep = Instance.new("Frame");
+    local topsepgrad = Instance.new("UIGradient");
+    
+    topsep.Name = "topsep";
+    topsep.Parent = top;
+    topsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+    topsep.BorderSizePixel = 0;
+    topsep.Position = UDim2.new(0, 0, 1, 0);
+    topsep.Size = UDim2.new(1, 0, 0, 1);
+    
+    topsepgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+    });
+    topsepgrad.Parent = topsep;
+    
     ttl.Name = "title";
     ttl.Parent = top;
     ttl.BackgroundTransparency = 1;
@@ -57,8 +75,27 @@ function components.createWindow(title)
     tabsContainer.Parent = main;
     tabsContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25);
     tabsContainer.BorderSizePixel = 0;
-    tabsContainer.Position = UDim2.new(0, 0, 0, 30);
-    tabsContainer.Size = UDim2.new(0, 100, 1, -30);
+    tabsContainer.Position = UDim2.new(0, 0, 0, 31);
+    tabsContainer.Size = UDim2.new(0, 100, 1, -31);
+    
+    -- Tab container separator with gradient
+    local tabsep = Instance.new("Frame");
+    local tabsepgrad = Instance.new("UIGradient");
+    
+    tabsep.Name = "tabsep";
+    tabsep.Parent = tabsContainer;
+    tabsep.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+    tabsep.BorderSizePixel = 0;
+    tabsep.Position = UDim2.new(1, -1, 0, 0);
+    tabsep.Size = UDim2.new(0, 1, 1, 0);
+    
+    tabsepgrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+    });
+    tabsepgrad.Parent = tabsep;
+    tabsepgrad.Rotation = 90;
     
     local tabList = Instance.new("UIListLayout");
     tabList.Parent = tabsContainer;
@@ -69,8 +106,16 @@ function components.createWindow(title)
     contentContainer.Parent = main;
     contentContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20);
     contentContainer.BorderSizePixel = 0;
-    contentContainer.Position = UDim2.new(0, 100, 0, 30);
-    contentContainer.Size = UDim2.new(1, -100, 1, -30);
+    contentContainer.Position = UDim2.new(0, 100, 0, 31);
+    contentContainer.Size = UDim2.new(1, -100, 1, -31);
+    
+    -- Animate gradients
+    local offset = 0;
+    rs.RenderStepped:Connect(function(delta)
+        offset = (offset + delta * 0.1) % 1;
+        topsepgrad.Offset = Vector2.new(offset, 0);
+        tabsepgrad.Offset = Vector2.new(offset, 0);
+    end);
     
     utils.makeDraggable(main, top);
     
@@ -85,6 +130,7 @@ function components.createWindow(title)
         local tab = Instance.new("TextButton");
         local page = Instance.new("ScrollingFrame");
         local pageList = Instance.new("UIListLayout");
+        local pagePadding = Instance.new("UIPadding");
         
         tab.Name = name;
         tab.Parent = tabsContainer;
@@ -106,10 +152,14 @@ function components.createWindow(title)
         page.ScrollBarThickness = 2;
         page.Visible = firstTab;
         
+        pagePadding.Parent = page;
+        pagePadding.PaddingLeft = UDim.new(0, 10);
+        pagePadding.PaddingRight = UDim.new(0, 10);
+        pagePadding.PaddingTop = UDim.new(0, 10);
+        
         pageList.Parent = page;
         pageList.SortOrder = Enum.SortOrder.LayoutOrder;
-        pageList.Padding = UDim.new(0, 5);
-        pageList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+        pageList.Padding = UDim.new(0, 8);
         
         if firstTab then
             tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
@@ -134,15 +184,18 @@ function components.createWindow(title)
         end);
         
         local tabContent = {};
+        local elementOrder = 0;
         
         function tabContent:btn(text, callback)
             local button = Instance.new("TextButton");
             
+            elementOrder = elementOrder + 1;
+            button.LayoutOrder = elementOrder;
             button.Name = text;
             button.Parent = page;
             button.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
             button.BorderSizePixel = 0;
-            button.Size = UDim2.new(1, -20, 0, 30);
+            button.Size = UDim2.new(1, 0, 0, 30);
             button.Font = Enum.Font.GothamBold;
             button.Text = text;
             button.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -167,23 +220,47 @@ function components.createWindow(title)
         
         function tabContent:sep(text)
             local sep = Instance.new("Frame");
+            local line = Instance.new("Frame");
+            local lineGrad = Instance.new("UIGradient");
             local label = Instance.new("TextLabel");
+            
+            elementOrder = elementOrder + 1;
+            sep.LayoutOrder = elementOrder;
             
             sep.Name = "separator";
             sep.Parent = page;
-            sep.BackgroundColor3 = Color3.fromRGB(40, 40, 40);
-            sep.BorderSizePixel = 0;
-            sep.Size = UDim2.new(1, -20, 0, 1);
+            sep.BackgroundTransparency = 1;
+            sep.Size = UDim2.new(1, 0, 0, 20);
+            
+            line.Parent = sep;
+            line.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+            line.BorderSizePixel = 0;
+            line.Position = UDim2.new(0, 0, 0.5, 0);
+            line.Size = UDim2.new(1, 0, 0, 1);
+            
+            lineGrad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+            });
+            lineGrad.Parent = line;
             
             label.Parent = sep;
-            label.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
+            label.BackgroundColor3 = Color3.fromRGB(20, 20, 20);
             label.BorderSizePixel = 0;
-            label.Position = UDim2.new(0.5, -40, -0.5, 0);
-            label.Size = UDim2.new(0, 80, 0, 16);
+            label.Position = UDim2.new(0.5, -50, 0, 0);
+            label.Size = UDim2.new(0, 100, 1, 0);
             label.Font = Enum.Font.GothamBold;
             label.Text = text;
             label.TextColor3 = Color3.fromRGB(255, 255, 255);
-            label.TextSize = 10;
+            label.TextSize = 12;
+            
+            -- Animate gradient
+            local offset = 0;
+            rs.RenderStepped:Connect(function(delta)
+                offset = (offset + delta * 0.1) % 1;
+                lineGrad.Offset = Vector2.new(offset, 0);
+            end);
             
             return sep;
         end;
