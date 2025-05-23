@@ -3,172 +3,179 @@ local rs = game:GetService("RunService");
 
 local elements = {};
 
-function elements.createTabHandler(tabContainer, pageContainer)
-    local firstTab = true;
-    local win = {};
+function elements.createTabHandler(tabFrame, pageFrame)
+    local selected;
+    local tabs = {};
     
-    function win:tab(name)
+    local function createTab(name)
         local tab = Instance.new("TextButton");
-        local tabgrad = Instance.new("UIGradient");
-        local btmsep = Instance.new("Frame");
-        local page = Instance.new("Frame");
-        local pageList = Instance.new("UIListLayout");
+        local page = Instance.new("ScrollingFrame");
+        local list = Instance.new("UIListLayout");
         
         tab.Name = name;
-        tab.Parent = tabContainer;
-        tab.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-        tab.BorderSizePixel = 0;
-        tab.Size = UDim2.new(1, 0, 0, 32);
-        tab.Font = Enum.Font.Gotham;
+        tab.Parent = tabFrame;
+        tab.BackgroundTransparency = 1;
+        tab.Size = UDim2.new(1, 0, 0, 30);
+        tab.Font = Enum.Font.GothamBold;
         tab.Text = name;
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
         tab.TextSize = 12;
-        tab.AutoButtonColor = false;
-        
-        tabgrad.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 25, 35))
-        });
-        tabgrad.Parent = tab;
-        
-        btmsep.Name = "btmsep";
-        btmsep.Parent = tab;
-        btmsep.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
-        btmsep.BorderSizePixel = 0;
-        btmsep.Position = UDim2.new(0, 0, 1, 0);
-        btmsep.Size = UDim2.new(1, 0, 0, 1);
-        btmsep.BackgroundTransparency = 0.5;
         
         page.Name = name;
-        page.Parent = pageContainer;
+        page.Parent = pageFrame;
         page.BackgroundTransparency = 1;
+        page.BorderSizePixel = 0;
         page.Size = UDim2.new(1, 0, 1, 0);
-        page.Visible = firstTab;
+        page.CanvasSize = UDim2.new(0, 0, 0, 0);
+        page.ScrollBarThickness = 2;
+        page.Visible = false;
         
-        pageList.Parent = page;
-        pageList.SortOrder = Enum.SortOrder.LayoutOrder;
-        pageList.Padding = UDim.new(0, 5);
+        list.Parent = page;
+        list.SortOrder = Enum.SortOrder.LayoutOrder;
+        list.Padding = UDim.new(0, 5);
         
-        if firstTab then
-            tabgrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 30, 40)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 35, 45))
-            });
-            firstTab = false;
-        end;
-        
-        tab.MouseButton1Click:Connect(function()
-            for _, v in pairs(pageContainer:GetChildren()) do
-                v.Visible = false;
-            end;
-            
-            for _, v in pairs(tabContainer:GetChildren()) do
-                if v:IsA("TextButton") then
-                    v.TextColor3 = Color3.fromRGB(255, 255, 255);
-                    local grad = v:FindFirstChild("UIGradient");
-                    if grad then
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 30)),
-                            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 25, 35))
-                        });
-                    end;
-                    if v ~= tab then
-                        v.Name = v.Name:gsub("_active", "");
-                    end;
-                end;
-            end;
-            
-            page.Visible = true;
-            tab.TextColor3 = Color3.fromRGB(255, 255, 255);
-            tab.Name = tab.Name .. "_active";
-            tabgrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 30, 40)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 35, 45))
-            });
+        list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            page.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y);
         end);
         
-        local tabContent = {};
-        
-        function tabContent:btn(txt, callback)
-            local btn = Instance.new("TextButton");
-            local btnframe = Instance.new("Frame");
-            
-            btnframe.Name = "btnframe";
-            btnframe.Parent = page;
-            btnframe.BackgroundColor3 = Color3.fromRGB(30, 25, 35);
-            btnframe.BorderSizePixel = 0;
-            btnframe.Size = UDim2.new(1, -10, 0, 30);
-            
-            btn.Name = "button";
-            btn.Parent = btnframe;
-            btn.BackgroundTransparency = 1;
-            btn.Size = UDim2.new(1, 0, 1, 0);
-            btn.Font = Enum.Font.Gotham;
-            btn.Text = "  " .. txt;
-            btn.TextColor3 = Color3.fromRGB(255, 255, 255);
-            btn.TextSize = 14;
-            btn.TextXAlignment = Enum.TextXAlignment.Left;
-            
-            btn.MouseButton1Click:Connect(function()
-                ts:Create(btnframe, TweenInfo.new(0.16), {
-                    BackgroundColor3 = Color3.fromRGB(40, 35, 45)
+        tab.MouseButton1Click:Connect(function()
+            if selected then
+                selected.page.Visible = false;
+                ts:Create(selected.tab, TweenInfo.new(0.2), {
+                    BackgroundTransparency = 1
                 }):Play();
-                
-                if callback then callback(); end;
-                
-                wait(0.16);
-                ts:Create(btnframe, TweenInfo.new(0.16), {
-                    BackgroundColor3 = Color3.fromRGB(30, 25, 35)
+            end;
+            
+            selected = tabs[name];
+            page.Visible = true;
+            ts:Create(tab, TweenInfo.new(0.2), {
+                BackgroundTransparency = 0.9
+            }):Play();
+        end);
+        
+        tabs[name] = {
+            tab = tab,
+            page = page,
+            list = list
+        };
+        
+        if not selected then
+            selected = tabs[name];
+            page.Visible = true;
+            tab.BackgroundTransparency = 0.9;
+        end;
+        
+        local function addButton(text, callback)
+            local button = Instance.new("TextButton");
+            local outline = Instance.new("UIStroke");
+            local outlineGradient = Instance.new("UIGradient");
+            
+            button.Name = text;
+            button.Parent = page;
+            button.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+            button.BorderSizePixel = 0;
+            button.Size = UDim2.new(1, 0, 0, 30);
+            button.Font = Enum.Font.GothamBold;
+            button.Text = text;
+            button.TextColor3 = Color3.fromRGB(255, 255, 255);
+            button.TextSize = 12;
+            button.AutoButtonColor = false;
+            
+            outline.Parent = button;
+            outline.Color = Color3.fromRGB(100, 50, 150);
+            outline.Thickness = 1;
+            
+            outlineGradient.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+            });
+            outlineGradient.Parent = outline;
+            
+            local offset = 0;
+            rs.RenderStepped:Connect(function(delta)
+                offset = (offset + delta * 0.1) % 1;
+                outlineGradient.Offset = Vector2.new(offset, 0);
+            end);
+            
+            button.MouseEnter:Connect(function()
+                ts:Create(button, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(20, 20, 20)
                 }):Play();
             end);
             
-            return btn;
+            button.MouseLeave:Connect(function()
+                ts:Create(button, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+                }):Play();
+            end);
+            
+            button.MouseButton1Click:Connect(callback);
         end;
-
-        function tabContent:sep(txt)
+        
+        local function addSeparator(text)
             local sep = Instance.new("Frame");
-            local line1 = Instance.new("Frame");
-            local line2 = Instance.new("Frame");
-            local lbl = Instance.new("TextLabel");
+            local label = Instance.new("TextLabel");
+            local left = Instance.new("Frame");
+            local right = Instance.new("Frame");
+            local leftGrad = Instance.new("UIGradient");
+            local rightGrad = Instance.new("UIGradient");
             
             sep.Name = "separator";
             sep.Parent = page;
             sep.BackgroundTransparency = 1;
-            sep.Size = UDim2.new(1, -10, 0, 20);
+            sep.Size = UDim2.new(1, 0, 0, 20);
             
-            line1.Name = "line1";
-            line1.Parent = sep;
-            line1.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
-            line1.BorderSizePixel = 0;
-            line1.Position = UDim2.new(0, 0, 0.5, 0);
-            line1.Size = UDim2.new(0.5, -13, 0, 1);
-            line1.BackgroundTransparency = 0.5;
+            label.Parent = sep;
+            label.BackgroundTransparency = 1;
+            label.Position = UDim2.new(0.5, -50, 0, 0);
+            label.Size = UDim2.new(0, 100, 1, 0);
+            label.Font = Enum.Font.GothamBold;
+            label.Text = text;
+            label.TextColor3 = Color3.fromRGB(255, 255, 255);
+            label.TextSize = 12;
             
-            lbl.Name = "text";
-            lbl.Parent = sep;
-            lbl.BackgroundTransparency = 1;
-            lbl.Position = UDim2.new(0.5, -10, 0, 0);
-            lbl.Size = UDim2.new(0, 20, 1, 0);
-            lbl.Font = Enum.Font.Gotham;
-            lbl.Text = txt or "•";
-            lbl.TextColor3 = Color3.fromRGB(255, 255, 255);
-            lbl.TextSize = 12;
+            left.Parent = sep;
+            left.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+            left.BorderSizePixel = 0;
+            left.Position = UDim2.new(0, 0, 0.5, 0);
+            left.Size = UDim2.new(0.5, -60, 0, 1);
             
-            line2.Name = "line2";
-            line2.Parent = sep;
-            line2.BackgroundColor3 = Color3.fromRGB(100, 50, 150);
-            line2.BorderSizePixel = 0;
-            line2.Position = UDim2.new(0.5, 13, 0.5, 0);
-            line2.Size = UDim2.new(0.5, -13, 0, 1);
-            line2.BackgroundTransparency = 0.5;
+            right.Parent = sep;
+            right.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+            right.BorderSizePixel = 0;
+            right.Position = UDim2.new(0.5, 60, 0.5, 0);
+            right.Size = UDim2.new(0.5, -60, 0, 1);
             
-            return sep;
+            leftGrad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 150))
+            });
+            leftGrad.Parent = left;
+            
+            rightGrad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 150)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+            });
+            rightGrad.Parent = right;
+            
+            local offset = 0;
+            rs.RenderStepped:Connect(function(delta)
+                offset = (offset + delta * 0.1) % 1;
+                leftGrad.Offset = Vector2.new(offset, 0);
+                rightGrad.Offset = Vector2.new(offset, 0);
+            end);
         end;
         
-        return tabContent;
+        return {
+            addButton = addButton,
+            addSeparator = addSeparator
+        };
     end;
     
-    return win;
+    return {
+        createTab = createTab
+    };
 end;
 
 return elements;
