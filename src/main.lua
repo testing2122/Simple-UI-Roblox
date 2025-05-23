@@ -5,4 +5,8 @@ function lib:win(title)
     return components.createWindow(title);
 end;
 
+function lib:window(title)
+    return self:win(title);
+end;
+
 return lib;
