@@ -75,7 +75,7 @@ function components.createWindow(title)
     tabsContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25);
     tabsContainer.BorderSizePixel = 0;
     tabsContainer.Position = UDim2.new(0, 0, 0, 31);
-    tabsContainer.Size = UDim2.new(0, 100, 0, 269);
+    tabsContainer.Size = UDim2.new(0, 100, 1, -31);
     tabsContainer.ClipsDescendants = true;
     
     local tabsep = Instance.new("Frame");
@@ -102,6 +102,10 @@ function components.createWindow(title)
     tabList.Padding = UDim.new(0, 2);
     tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left;
     tabList.VerticalAlignment = Enum.VerticalAlignment.Top;
+    
+    local tabPadding = Instance.new("UIPadding");
+    tabPadding.Parent = tabsContainer;
+    tabPadding.PaddingTop = UDim.new(0, 2);
     
     contentContainer.Name = "content";
     contentContainer.Parent = main;
