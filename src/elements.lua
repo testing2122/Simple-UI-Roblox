@@ -17,7 +17,8 @@ function elements.createTabHandler(tabContainer, pageContainer)
         tab.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
         tab.BackgroundTransparency = 0.1;
         tab.BorderSizePixel = 0;
-        tab.Size = UDim2.new(1, 0, 0, 30);
+        tab.Size = UDim2.new(1, -10, 0, 30); -- Added -10 to keep tabs inside container
+        tab.Position = UDim2.new(0, 5, 0, 0); -- Added 5 pixel padding
         tab.Font = Enum.Font.GothamBold;
         tab.Text = name;
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -71,8 +72,6 @@ function elements.createTabHandler(tabContainer, pageContainer)
         
         function tabContent:btn(text, callback)
             local button = Instance.new("TextButton");
-            local outline = Instance.new("UIStroke");
-            local outlineGradient = Instance.new("UIGradient");
             
             button.Name = text;
             button.Parent = page;
@@ -84,23 +83,6 @@ function elements.createTabHandler(tabContainer, pageContainer)
             button.TextColor3 = Color3.fromRGB(255, 255, 255);
             button.TextSize = 12;
             button.AutoButtonColor = false;
-            
-            outline.Parent = button;
-            outline.Color = Color3.fromRGB(100, 50, 150);
-            outline.Thickness = 1;
-            
-            outlineGradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 50, 150)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
-            });
-            outlineGradient.Parent = outline;
-            
-            local offset = 0;
-            rs.RenderStepped:Connect(function(delta)
-                offset = (offset + delta * 0.1) % 1;
-                outlineGradient.Offset = Vector2.new(offset, 0);
-            end);
             
             button.MouseEnter:Connect(function()
                 ts:Create(button, TweenInfo.new(0.2), {
@@ -122,9 +104,7 @@ function elements.createTabHandler(tabContainer, pageContainer)
         function tabContent:sep(text)
             local sep = Instance.new("Frame");
             local label = Instance.new("TextLabel");
-            local left = Instance.new("Frame");
             local right = Instance.new("Frame");
-            local leftGrad = Instance.new("UIGradient");
             local rightGrad = Instance.new("UIGradient");
             
             sep.Name = "separator";
@@ -134,41 +114,28 @@ function elements.createTabHandler(tabContainer, pageContainer)
             
             label.Parent = sep;
             label.BackgroundTransparency = 1;
-            label.Position = UDim2.new(0.5, -50, 0, 0);
+            label.Position = UDim2.new(1, -120, 0, 0); -- Moved to right side
             label.Size = UDim2.new(0, 100, 1, 0);
             label.Font = Enum.Font.GothamBold;
             label.Text = text or "•";
             label.TextColor3 = Color3.fromRGB(255, 255, 255);
             label.TextSize = 12;
             
-            left.Parent = sep;
-            left.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-            left.BorderSizePixel = 0;
-            left.Position = UDim2.new(0, 0, 0.5, 0);
-            left.Size = UDim2.new(0.5, -60, 0, 1);
-            
             right.Parent = sep;
             right.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
             right.BorderSizePixel = 0;
-            right.Position = UDim2.new(0.5, 60, 0.5, 0);
-            right.Size = UDim2.new(0.5, -60, 0, 1);
-            
-            leftGrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 150))
-            });
-            leftGrad.Parent = left;
+            right.Position = UDim2.new(0, 10, 0.5, 0); -- Adjusted position
+            right.Size = UDim2.new(1, -140, 0, 1); -- Adjusted size
             
             rightGrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 150)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 20, 80))
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 80)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 150))
             });
             rightGrad.Parent = right;
             
             local offset = 0;
             rs.RenderStepped:Connect(function(delta)
                 offset = (offset + delta * 0.1) % 1;
-                leftGrad.Offset = Vector2.new(offset, 0);
                 rightGrad.Offset = Vector2.new(offset, 0);
             end);
             
