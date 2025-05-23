@@ -1,6 +1,6 @@
 --[[
-    Advanced Purple UI Library for Roblox - Professional Gaming Interface
-    Inspired by modern cheat interfaces with sidebar navigation
+    Reactive Advanced Purple UI Library for Roblox
+    Professional Gaming Interface with Connected Tabs and Modern Dark Theme
     
     Usage:
     local Library = loadstring(game:HttpGet("YOUR_GITHUB_URL"))()
@@ -16,57 +16,67 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
--- Enhanced Color Palette
+-- Enhanced Modern Color Palette
 Library.Colors = {
     -- Main Colors
-    Primary = Color3.fromRGB(139, 92, 246),      -- Purple
-    Secondary = Color3.fromRGB(168, 85, 247),    -- Lighter Purple
-    Accent = Color3.fromRGB(196, 181, 253),      -- Light Purple
+    Primary = Color3.fromRGB(147, 51, 234),        -- Deep Purple
+    Secondary = Color3.fromRGB(168, 85, 247),      -- Lighter Purple
+    Accent = Color3.fromRGB(196, 181, 253),        -- Light Purple
     
-    -- Backgrounds
-    Background = Color3.fromRGB(17, 17, 27),     -- Very Dark
-    BackgroundLight = Color3.fromRGB(24, 24, 37), -- Dark
-    BackgroundLighter = Color3.fromRGB(31, 31, 47), -- Medium Dark
-    Sidebar = Color3.fromRGB(20, 20, 30),        -- Sidebar
+    -- Modern Dark Backgrounds
+    Background = Color3.fromRGB(9, 9, 11),         -- Almost Black
+    BackgroundSecondary = Color3.fromRGB(15, 15, 17), -- Very Dark
+    BackgroundTertiary = Color3.fromRGB(20, 20, 23),  -- Dark
+    Sidebar = Color3.fromRGB(12, 12, 14),          -- Sidebar Dark
+    ContentArea = Color3.fromRGB(16, 16, 18),      -- Content Background
     
-    -- Text
-    Text = Color3.fromRGB(255, 255, 255),        -- White
-    TextSecondary = Color3.fromRGB(156, 163, 175), -- Gray
-    TextMuted = Color3.fromRGB(107, 114, 128),   -- Muted Gray
+    -- Text Colors
+    Text = Color3.fromRGB(255, 255, 255),          -- Pure White
+    TextSecondary = Color3.fromRGB(161, 161, 170), -- Light Gray
+    TextMuted = Color3.fromRGB(113, 113, 122),     -- Muted Gray
+    TextDark = Color3.fromRGB(82, 82, 91),         -- Dark Gray
     
-    -- States
-    Success = Color3.fromRGB(34, 197, 94),       -- Green
-    Warning = Color3.fromRGB(251, 191, 36),      -- Yellow
-    Error = Color3.fromRGB(239, 68, 68),         -- Red
+    -- State Colors
+    Success = Color3.fromRGB(34, 197, 94),         -- Green
+    Warning = Color3.fromRGB(251, 191, 36),        -- Yellow
+    Error = Color3.fromRGB(239, 68, 68),           -- Red
     
-    -- Borders
-    Border = Color3.fromRGB(55, 65, 81),         -- Border
-    BorderLight = Color3.fromRGB(75, 85, 99),    -- Light Border
+    -- Border Colors
+    Border = Color3.fromRGB(39, 39, 42),           -- Dark Border
+    BorderLight = Color3.fromRGB(63, 63, 70),      -- Light Border
+    BorderAccent = Color3.fromRGB(147, 51, 234),   -- Purple Border
+    
+    -- Interactive States
+    Hover = Color3.fromRGB(24, 24, 27),            -- Hover State
+    Active = Color3.fromRGB(30, 30, 33),           -- Active State
+    Selected = Color3.fromRGB(147, 51, 234),       -- Selected State
 }
 
--- Icons (using Unicode characters)
+-- Enhanced Icons
 Library.Icons = {
     Movement = "🎮",
+    Combat = "⚔️",
+    Visual = "👁️",
     Settings = "⚙️",
     Skins = "🎨",
     Player = "👤",
-    Combat = "⚔️",
-    Visual = "👁️",
     Misc = "📦",
     Home = "🏠",
     Search = "🔍",
     Close = "✕",
     Minimize = "−",
-    ChevronRight = "›",
-    ChevronDown = "⌄",
+    ChevronRight = "❯",
+    ChevronDown = "❯",
     Toggle = "●",
     Slider = "━",
+    Check = "✓",
+    Cross = "✗",
 }
 
--- Utility Functions
+-- Enhanced Utility Functions
 function Library:Tween(object, properties, duration, style, direction, callback)
     local tweenInfo = TweenInfo.new(
-        duration or 0.3,
+        duration or 0.25,
         style or Enum.EasingStyle.Quart,
         direction or Enum.EasingDirection.Out
     )
@@ -116,20 +126,19 @@ function Library:CreateGradient(parent, colors, rotation)
     })
 end
 
-function Library:CreateShadow(parent, size, intensity)
-    local shadow = self:CreateInstance("ImageLabel", {
-        Name = "Shadow",
+function Library:CreateDropShadow(parent, size, intensity)
+    local shadow = self:CreateInstance("Frame", {
+        Name = "DropShadow",
         Parent = parent.Parent,
-        BackgroundTransparency = 1,
-        Image = "rbxasset://textures/ui/GuiImagePlaceholder.png",
-        ImageColor3 = Color3.fromRGB(0, 0, 0),
-        ImageTransparency = 1 - (intensity or 0.3),
-        Position = UDim2.new(0, size or 4, 0, size or 4),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 1 - (intensity or 0.4),
+        Position = UDim2.new(0, size or 6, 0, size or 6),
         Size = parent.Size,
-        ZIndex = parent.ZIndex - 1
+        ZIndex = parent.ZIndex - 1,
+        BorderSizePixel = 0
     })
     
-    self:CreateCorner(shadow, 8)
+    self:CreateCorner(shadow, 12)
     return shadow
 end
 
@@ -140,101 +149,116 @@ function Library:CreateWindow(title, version)
     
     -- Create ScreenGui
     window.ScreenGui = self:CreateInstance("ScreenGui", {
-        Name = "AdvancedPurpleUI_" .. math.random(1000, 9999),
+        Name = "ReactiveAdvancedUI_" .. math.random(1000, 9999),
         Parent = CoreGui,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         ResetOnSpawn = false
     })
     
-    -- Main Container
+    -- Main Container with modern styling
     window.MainFrame = self:CreateInstance("Frame", {
         Name = "MainFrame",
         Parent = window.ScreenGui,
         BackgroundColor3 = self.Colors.Background,
         Position = UDim2.new(0.5, 0, 0.5, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.new(0, 900, 0, 600),
+        Size = UDim2.new(0, 950, 0, 650),
         BorderSizePixel = 0,
-        ClipsDescendants = true
+        ClipsDescendants = false
     })
     
-    self:CreateCorner(window.MainFrame, 12)
-    self:CreateStroke(window.MainFrame, self.Colors.Border, 1, 0.5)
+    self:CreateCorner(window.MainFrame, 16)
+    self:CreateStroke(window.MainFrame, self.Colors.Border, 1, 0.3)
+    self:CreateDropShadow(window.MainFrame, 8, 0.6)
     
-    -- Sidebar
+    -- Sidebar with enhanced styling
     window.Sidebar = self:CreateInstance("Frame", {
         Name = "Sidebar",
         Parent = window.MainFrame,
         BackgroundColor3 = self.Colors.Sidebar,
-        Size = UDim2.new(0, 200, 1, 0),
+        Size = UDim2.new(0, 220, 1, 0),
         BorderSizePixel = 0
     })
     
-    self:CreateCorner(window.Sidebar, 12)
+    self:CreateCorner(window.Sidebar, 16)
     
-    -- Sidebar content mask
-    local sidebarMask = self:CreateInstance("Frame", {
-        Name = "SidebarMask",
+    -- Sidebar right border to separate from content
+    window.SidebarBorder = self:CreateInstance("Frame", {
+        Name = "SidebarBorder",
         Parent = window.Sidebar,
-        BackgroundColor3 = self.Colors.Sidebar,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 8, 1, 0),
+        BackgroundColor3 = self.Colors.Border,
+        Position = UDim2.new(1, -1, 0, 0),
+        Size = UDim2.new(0, 1, 1, 0),
         BorderSizePixel = 0
     })
     
-    -- Header in sidebar
+    -- Header section in sidebar
     window.Header = self:CreateInstance("Frame", {
         Name = "Header",
         Parent = window.Sidebar,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 60),
+        Size = UDim2.new(1, 0, 0, 80),
         BorderSizePixel = 0
     })
     
-    -- Logo/Title
+    -- Logo container with background
+    window.LogoContainer = self:CreateInstance("Frame", {
+        Name = "LogoContainer",
+        Parent = window.Header,
+        BackgroundColor3 = self.Colors.BackgroundSecondary,
+        Position = UDim2.new(0, 15, 0, 15),
+        Size = UDim2.new(1, -30, 0, 50),
+        BorderSizePixel = 0
+    })
+    
+    self:CreateCorner(window.LogoContainer, 10)
+    self:CreateStroke(window.LogoContainer, self.Colors.BorderAccent, 1, 0.5)
+    
+    -- Logo/Title with icon
     window.Logo = self:CreateInstance("TextLabel", {
         Name = "Logo",
-        Parent = window.Header,
+        Parent = window.LogoContainer,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 20, 0, 15),
-        Size = UDim2.new(1, -40, 0, 25),
+        Position = UDim2.new(0, 15, 0, 8),
+        Size = UDim2.new(1, -30, 0, 22),
         Font = Enum.Font.GothamBold,
         Text = "🔮 " .. (title or "Advanced UI"),
         TextColor3 = self.Colors.Primary,
-        TextSize = 18,
+        TextSize = 16,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    -- Version
+    -- Version with better styling
     window.Version = self:CreateInstance("TextLabel", {
         Name = "Version",
-        Parent = window.Header,
+        Parent = window.LogoContainer,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 20, 0, 35),
-        Size = UDim2.new(1, -40, 0, 15),
+        Position = UDim2.new(0, 15, 0, 28),
+        Size = UDim2.new(1, -30, 0, 14),
         Font = Enum.Font.Gotham,
         Text = version or "v1.0.0",
         TextColor3 = self.Colors.TextMuted,
-        TextSize = 12,
+        TextSize = 11,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    -- Navigation Container
+    -- Navigation Container with enhanced styling
     window.NavContainer = self:CreateInstance("ScrollingFrame", {
         Name = "NavContainer",
         Parent = window.Sidebar,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 0, 0, 70),
-        Size = UDim2.new(1, 0, 1, -70),
+        Position = UDim2.new(0, 0, 0, 90),
+        Size = UDim2.new(1, 0, 1, -90),
         CanvasSize = UDim2.new(0, 0, 0, 0),
         ScrollBarThickness = 4,
         ScrollBarImageColor3 = self.Colors.Primary,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        ScrollingDirection = Enum.ScrollingDirection.Y
     })
     
     local navLayout = self:CreateInstance("UIListLayout", {
         Parent = window.NavContainer,
-        Padding = UDim.new(0, 4),
+        Padding = UDim.new(0, 6),
         SortOrder = Enum.SortOrder.LayoutOrder
     })
     
@@ -242,123 +266,177 @@ function Library:CreateWindow(title, version)
         window.NavContainer.CanvasSize = UDim2.new(0, 0, 0, navLayout.AbsoluteContentSize.Y + 20)
     end)
     
-    -- Main Content Area
+    -- Main Content Area with modern styling
     window.ContentArea = self:CreateInstance("Frame", {
         Name = "ContentArea",
         Parent = window.MainFrame,
-        BackgroundColor3 = self.Colors.BackgroundLight,
-        Position = UDim2.new(0, 200, 0, 0),
-        Size = UDim2.new(1, -200, 1, 0),
+        BackgroundColor3 = self.Colors.ContentArea,
+        Position = UDim2.new(0, 220, 0, 0),
+        Size = UDim2.new(1, -220, 1, 0),
         BorderSizePixel = 0
     })
     
-    -- Content Header
+    -- Content area corner (only right side)
+    local contentCorner = self:CreateInstance("UICorner", {
+        CornerRadius = UDim.new(0, 16),
+        Parent = window.ContentArea
+    })
+    
+    -- Mask to hide left corners
+    local contentMask = self:CreateInstance("Frame", {
+        Name = "ContentMask",
+        Parent = window.ContentArea,
+        BackgroundColor3 = self.Colors.ContentArea,
+        Position = UDim2.new(0, -8, 0, 0),
+        Size = UDim2.new(0, 16, 1, 0),
+        BorderSizePixel = 0
+    })
+    
+    -- Enhanced Content Header
     window.ContentHeader = self:CreateInstance("Frame", {
         Name = "ContentHeader",
         Parent = window.ContentArea,
-        BackgroundColor3 = self.Colors.BackgroundLighter,
-        Size = UDim2.new(1, 0, 0, 50),
+        BackgroundColor3 = self.Colors.BackgroundSecondary,
+        Size = UDim2.new(1, 0, 0, 60),
         BorderSizePixel = 0
     })
     
-    -- Window Controls
+    -- Header bottom border
+    window.HeaderBorder = self:CreateInstance("Frame", {
+        Name = "HeaderBorder",
+        Parent = window.ContentHeader,
+        BackgroundColor3 = self.Colors.Border,
+        Position = UDim2.new(0, 0, 1, -1),
+        Size = UDim2.new(1, 0, 0, 1),
+        BorderSizePixel = 0
+    })
+    
+    -- Window Controls with enhanced styling
     window.WindowControls = self:CreateInstance("Frame", {
         Name = "WindowControls",
         Parent = window.ContentHeader,
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -80, 0, 10),
-        Size = UDim2.new(0, 70, 0, 30),
+        Position = UDim2.new(1, -90, 0, 15),
+        Size = UDim2.new(0, 80, 0, 30),
         BorderSizePixel = 0
     })
     
-    -- Minimize Button
+    -- Enhanced Minimize Button
     window.MinimizeBtn = self:CreateInstance("TextButton", {
         Name = "MinimizeBtn",
         Parent = window.WindowControls,
-        BackgroundColor3 = self.Colors.BackgroundLighter,
+        BackgroundColor3 = self.Colors.BackgroundTertiary,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 30, 0, 30),
+        Size = UDim2.new(0, 35, 0, 30),
         Font = Enum.Font.GothamBold,
         Text = self.Icons.Minimize,
         TextColor3 = self.Colors.TextSecondary,
         TextSize = 16,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        AutoButtonColor = false
     })
     
-    self:CreateCorner(window.MinimizeBtn, 6)
+    self:CreateCorner(window.MinimizeBtn, 8)
+    self:CreateStroke(window.MinimizeBtn, self.Colors.Border, 1, 0.5)
     
-    -- Close Button
+    -- Enhanced Close Button
     window.CloseBtn = self:CreateInstance("TextButton", {
         Name = "CloseBtn",
         Parent = window.WindowControls,
-        BackgroundColor3 = self.Colors.BackgroundLighter,
-        Position = UDim2.new(0, 35, 0, 0),
-        Size = UDim2.new(0, 30, 0, 30),
+        BackgroundColor3 = self.Colors.BackgroundTertiary,
+        Position = UDim2.new(0, 40, 0, 0),
+        Size = UDim2.new(0, 35, 0, 30),
         Font = Enum.Font.GothamBold,
         Text = self.Icons.Close,
         TextColor3 = self.Colors.TextSecondary,
         TextSize = 14,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        AutoButtonColor = false
     })
     
-    self:CreateCorner(window.CloseBtn, 6)
+    self:CreateCorner(window.CloseBtn, 8)
+    self:CreateStroke(window.CloseBtn, self.Colors.Border, 1, 0.5)
     
-    -- Button hover effects
+    -- Enhanced button hover effects
     window.MinimizeBtn.MouseEnter:Connect(function()
-        self:Tween(window.MinimizeBtn, {BackgroundColor3 = self.Colors.Warning, TextColor3 = self.Colors.Background}, 0.2)
+        self:Tween(window.MinimizeBtn, {
+            BackgroundColor3 = self.Colors.Warning, 
+            TextColor3 = self.Colors.Background
+        }, 0.2)
+        self:Tween(window.MinimizeBtn.UIStroke, {Color = self.Colors.Warning}, 0.2)
     end)
     
     window.MinimizeBtn.MouseLeave:Connect(function()
-        self:Tween(window.MinimizeBtn, {BackgroundColor3 = self.Colors.BackgroundLighter, TextColor3 = self.Colors.TextSecondary}, 0.2)
+        self:Tween(window.MinimizeBtn, {
+            BackgroundColor3 = self.Colors.BackgroundTertiary, 
+            TextColor3 = self.Colors.TextSecondary
+        }, 0.2)
+        self:Tween(window.MinimizeBtn.UIStroke, {Color = self.Colors.Border}, 0.2)
     end)
     
     window.CloseBtn.MouseEnter:Connect(function()
-        self:Tween(window.CloseBtn, {BackgroundColor3 = self.Colors.Error, TextColor3 = self.Colors.Text}, 0.2)
+        self:Tween(window.CloseBtn, {
+            BackgroundColor3 = self.Colors.Error, 
+            TextColor3 = self.Colors.Text
+        }, 0.2)
+        self:Tween(window.CloseBtn.UIStroke, {Color = self.Colors.Error}, 0.2)
     end)
     
     window.CloseBtn.MouseLeave:Connect(function()
-        self:Tween(window.CloseBtn, {BackgroundColor3 = self.Colors.BackgroundLighter, TextColor3 = self.Colors.TextSecondary}, 0.2)
+        self:Tween(window.CloseBtn, {
+            BackgroundColor3 = self.Colors.BackgroundTertiary, 
+            TextColor3 = self.Colors.TextSecondary
+        }, 0.2)
+        self:Tween(window.CloseBtn.UIStroke, {Color = self.Colors.Border}, 0.2)
     end)
     
-    -- Button functionality
+    -- Button functionality with animations
     window.MinimizeBtn.MouseButton1Click:Connect(function()
-        window.MainFrame.Visible = false
-        
-        -- Create restore notification
-        local restoreBtn = self:CreateInstance("TextButton", {
-            Name = "RestoreBtn",
-            Parent = window.ScreenGui,
-            BackgroundColor3 = self.Colors.Primary,
-            Position = UDim2.new(0, 20, 1, -60),
-            Size = UDim2.new(0, 200, 0, 40),
-            Font = Enum.Font.GothamSemibold,
-            Text = "🔮 Restore " .. (title or "UI"),
-            TextColor3 = self.Colors.Text,
-            TextSize = 14,
-            BorderSizePixel = 0
-        })
-        
-        self:CreateCorner(restoreBtn, 8)
-        
-        restoreBtn.MouseButton1Click:Connect(function()
-            window.MainFrame.Visible = true
-            restoreBtn:Destroy()
+        self:Tween(window.MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In, function()
+            window.MainFrame.Visible = false
+            
+            -- Create enhanced restore button
+            local restoreBtn = self:CreateInstance("TextButton", {
+                Name = "RestoreBtn",
+                Parent = window.ScreenGui,
+                BackgroundColor3 = self.Colors.Primary,
+                Position = UDim2.new(0, 20, 1, -70),
+                Size = UDim2.new(0, 220, 0, 50),
+                Font = Enum.Font.GothamSemibold,
+                Text = "🔮 Restore " .. (title or "UI"),
+                TextColor3 = self.Colors.Text,
+                TextSize = 14,
+                BorderSizePixel = 0,
+                AutoButtonColor = false
+            })
+            
+            self:CreateCorner(restoreBtn, 12)
+            self:CreateGradient(restoreBtn)
+            
+            restoreBtn.MouseButton1Click:Connect(function()
+                window.MainFrame.Visible = true
+                self:Tween(window.MainFrame, {Size = UDim2.new(0, 950, 0, 650)}, 0.3, Enum.EasingStyle.Back)
+                restoreBtn:Destroy()
+            end)
         end)
     end)
     
     window.CloseBtn.MouseButton1Click:Connect(function()
-        self:Tween(window.MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In, function()
+        self:Tween(window.MainFrame, {
+            Size = UDim2.new(0, 0, 0, 0),
+            BackgroundTransparency = 1
+        }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In, function()
             window.ScreenGui:Destroy()
         end)
     end)
     
-    -- Content Title
+    -- Enhanced Content Title with breadcrumb
     window.ContentTitle = self:CreateInstance("TextLabel", {
         Name = "ContentTitle",
         Parent = window.ContentHeader,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 20, 0, 0),
-        Size = UDim2.new(1, -120, 1, 0),
+        Position = UDim2.new(0, 25, 0, 0),
+        Size = UDim2.new(1, -140, 1, 0),
         Font = Enum.Font.GothamBold,
         Text = "Welcome",
         TextColor3 = self.Colors.Text,
@@ -366,30 +444,31 @@ function Library:CreateWindow(title, version)
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    -- Content Container
+    -- Content Container with enhanced styling
     window.ContentContainer = self:CreateInstance("ScrollingFrame", {
         Name = "ContentContainer",
         Parent = window.ContentArea,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 20, 0, 70),
-        Size = UDim2.new(1, -40, 1, -90),
+        Position = UDim2.new(0, 25, 0, 80),
+        Size = UDim2.new(1, -50, 1, -100),
         CanvasSize = UDim2.new(0, 0, 0, 0),
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Colors.Primary,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        ScrollingDirection = Enum.ScrollingDirection.Y
     })
     
     local contentLayout = self:CreateInstance("UIListLayout", {
         Parent = window.ContentContainer,
-        Padding = UDim.new(0, 15),
+        Padding = UDim.new(0, 20),
         SortOrder = Enum.SortOrder.LayoutOrder
     })
     
     contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        window.ContentContainer.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+        window.ContentContainer.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 30)
     end)
     
-    -- Make window draggable
+    -- Make window draggable with enhanced feedback
     local dragging = false
     local dragInput, dragStart, startPos
     
@@ -398,12 +477,18 @@ function Library:CreateWindow(title, version)
             dragging = true
             dragStart = input.Position
             startPos = window.MainFrame.Position
+            
+            -- Visual feedback when dragging starts
+            self:Tween(window.MainFrame, {BackgroundColor3 = self.Colors.BackgroundSecondary}, 0.2)
         end
     end)
     
     window.ContentHeader.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
+            
+            -- Reset visual feedback
+            self:Tween(window.MainFrame, {BackgroundColor3 = self.Colors.Background}, 0.2)
         end
     end)
     
@@ -429,16 +514,16 @@ function Library:CreateWindow(title, version)
     window.Tabs = {}
     window.CurrentTab = nil
     
-    -- Tab Creation Function
+    -- Enhanced Tab Creation Function
     function window:CreateTab(name, icon)
         local tab = {}
         
-        -- Navigation Button
+        -- Enhanced Navigation Button
         tab.NavButton = Library:CreateInstance("TextButton", {
             Name = name .. "NavButton",
             Parent = self.NavContainer,
-            BackgroundColor3 = Library.Colors.BackgroundLighter,
-            Size = UDim2.new(1, -20, 0, 40),
+            BackgroundColor3 = Library.Colors.BackgroundTertiary,
+            Size = UDim2.new(1, -20, 0, 45),
             Position = UDim2.new(0, 10, 0, 0),
             Font = Enum.Font.GothamSemibold,
             Text = "",
@@ -448,15 +533,28 @@ function Library:CreateWindow(title, version)
             AutoButtonColor = false
         })
         
-        Library:CreateCorner(tab.NavButton, 8)
+        Library:CreateCorner(tab.NavButton, 10)
+        Library:CreateStroke(tab.NavButton, Library.Colors.Border, 1, 0.5)
         
-        -- Icon
+        -- Selection indicator (left border)
+        tab.SelectionIndicator = Library:CreateInstance("Frame", {
+            Name = "SelectionIndicator",
+            Parent = tab.NavButton,
+            BackgroundColor3 = Library.Colors.Primary,
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(0, 0, 1, 0),
+            BorderSizePixel = 0
+        })
+        
+        Library:CreateCorner(tab.SelectionIndicator, 10)
+        
+        -- Icon with enhanced styling
         tab.Icon = Library:CreateInstance("TextLabel", {
             Name = "Icon",
             Parent = tab.NavButton,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 15, 0, 0),
-            Size = UDim2.new(0, 20, 1, 0),
+            Position = UDim2.new(0, 18, 0, 0),
+            Size = UDim2.new(0, 25, 1, 0),
             Font = Enum.Font.GothamBold,
             Text = icon or Library.Icons.Settings,
             TextColor3 = Library.Colors.TextSecondary,
@@ -464,13 +562,13 @@ function Library:CreateWindow(title, version)
             TextXAlignment = Enum.TextXAlignment.Center
         })
         
-        -- Label
+        -- Label with enhanced styling
         tab.Label = Library:CreateInstance("TextLabel", {
             Name = "Label",
             Parent = tab.NavButton,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 45, 0, 0),
-            Size = UDim2.new(1, -45, 1, 0),
+            Position = UDim2.new(0, 50, 0, 0),
+            Size = UDim2.new(1, -50, 1, 0),
             Font = Enum.Font.GothamSemibold,
             Text = name,
             TextColor3 = Library.Colors.TextSecondary,
@@ -490,7 +588,7 @@ function Library:CreateWindow(title, version)
         
         local tabLayout = Library:CreateInstance("UIListLayout", {
             Parent = tab.Content,
-            Padding = UDim.new(0, 12),
+            Padding = UDim.new(0, 15),
             SortOrder = Enum.SortOrder.LayoutOrder
         })
         
@@ -498,21 +596,25 @@ function Library:CreateWindow(title, version)
             tab.Content.Size = UDim2.new(1, 0, 0, tabLayout.AbsoluteContentSize.Y)
         end)
         
-        -- Tab Selection
+        -- Enhanced Tab Selection with smooth animations
         tab.NavButton.MouseButton1Click:Connect(function()
             self:SelectTab(tab)
         end)
         
-        -- Hover Effects
+        -- Enhanced Hover Effects
         tab.NavButton.MouseEnter:Connect(function()
             if self.CurrentTab ~= tab then
-                Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.BackgroundLight}, 0.2)
+                Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.Hover}, 0.2)
+                Library:Tween(tab.Icon, {TextColor3 = Library.Colors.TextSecondary}, 0.2)
+                Library:Tween(tab.Label, {TextColor3 = Library.Colors.TextSecondary}, 0.2)
             end
         end)
         
         tab.NavButton.MouseLeave:Connect(function()
             if self.CurrentTab ~= tab then
-                Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.BackgroundLighter}, 0.2)
+                Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.BackgroundTertiary}, 0.2)
+                Library:Tween(tab.Icon, {TextColor3 = Library.Colors.TextMuted}, 0.2)
+                Library:Tween(tab.Label, {TextColor3 = Library.Colors.TextMuted}, 0.2)
             end
         end)
         
@@ -524,29 +626,43 @@ function Library:CreateWindow(title, version)
             self:SelectTab(tab)
         end
         
-        -- Component creation functions for tabs
+        -- Enhanced Component creation functions for tabs
         function tab:CreateSection(title)
             local section = {}
             
             section.Frame = Library:CreateInstance("Frame", {
                 Name = title .. "Section",
                 Parent = self.Content,
-                BackgroundColor3 = Library.Colors.BackgroundLighter,
+                BackgroundColor3 = Library.Colors.BackgroundSecondary,
                 Size = UDim2.new(1, 0, 0, 0),
                 BorderSizePixel = 0
             })
             
-            Library:CreateCorner(section.Frame, 10)
+            Library:CreateCorner(section.Frame, 12)
             Library:CreateStroke(section.Frame, Library.Colors.Border, 1, 0.3)
             
+            -- Enhanced section header
             section.Header = Library:CreateInstance("Frame", {
                 Name = "Header",
                 Parent = section.Frame,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, 40),
+                BackgroundColor3 = Library.Colors.BackgroundTertiary,
+                Size = UDim2.new(1, 0, 0, 50),
                 BorderSizePixel = 0
             })
             
+            Library:CreateCorner(section.Header, 12)
+            
+            -- Header mask to hide bottom corners
+            local headerMask = Library:CreateInstance("Frame", {
+                Name = "HeaderMask",
+                Parent = section.Header,
+                BackgroundColor3 = Library.Colors.BackgroundTertiary,
+                Position = UDim2.new(0, 0, 0.6, 0),
+                Size = UDim2.new(1, 0, 0.4, 0),
+                BorderSizePixel = 0
+            })
+            
+            -- Section title with enhanced styling
             section.Title = Library:CreateInstance("TextLabel", {
                 Name = "Title",
                 Parent = section.Header,
@@ -560,26 +676,27 @@ function Library:CreateWindow(title, version)
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             
+            -- Section container
             section.Container = Library:CreateInstance("Frame", {
                 Name = "Container",
                 Parent = section.Frame,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 20, 0, 50),
-                Size = UDim2.new(1, -40, 1, -60),
+                Position = UDim2.new(0, 20, 0, 60),
+                Size = UDim2.new(1, -40, 1, -70),
                 BorderSizePixel = 0
             })
             
             local sectionLayout = Library:CreateInstance("UIListLayout", {
                 Parent = section.Container,
-                Padding = UDim.new(0, 10),
+                Padding = UDim.new(0, 12),
                 SortOrder = Enum.SortOrder.LayoutOrder
             })
             
             sectionLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                section.Frame.Size = UDim2.new(1, 0, 0, sectionLayout.AbsoluteContentSize.Y + 70)
+                section.Frame.Size = UDim2.new(1, 0, 0, sectionLayout.AbsoluteContentSize.Y + 80)
             end)
             
-            -- Component creation functions
+            -- Enhanced Component creation functions
             function section:CreateToggle(name, default, callback)
                 local toggle = {}
                 
@@ -587,7 +704,7 @@ function Library:CreateWindow(title, version)
                     Name = name .. "Toggle",
                     Parent = self.Container,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 35),
+                    Size = UDim2.new(1, 0, 0, 40),
                     BorderSizePixel = 0
                 })
                 
@@ -600,26 +717,29 @@ function Library:CreateWindow(title, version)
                     BorderSizePixel = 0
                 })
                 
+                -- Enhanced toggle indicator
                 toggle.Indicator = Library:CreateInstance("Frame", {
                     Name = "Indicator",
                     Parent = toggle.Frame,
-                    BackgroundColor3 = default and Library.Colors.Primary or Library.Colors.BackgroundLight,
-                    Size = UDim2.new(0, 16, 0, 16),
+                    BackgroundColor3 = default and Library.Colors.Primary or Library.Colors.BackgroundTertiary,
+                    Size = UDim2.new(0, 18, 0, 18),
                     Position = UDim2.new(0, 0, 0.5, 0),
                     AnchorPoint = Vector2.new(0, 0.5),
                     BorderSizePixel = 0
                 })
                 
-                Library:CreateCorner(toggle.Indicator, 3)
+                Library:CreateCorner(toggle.Indicator, 4)
+                Library:CreateStroke(toggle.Indicator, default and Library.Colors.Primary or Library.Colors.Border, 1, 0.3)
                 
+                -- Checkmark with animation
                 if default then
-                    local checkmark = Library:CreateInstance("TextLabel", {
+                    toggle.Checkmark = Library:CreateInstance("TextLabel", {
                         Name = "Checkmark",
                         Parent = toggle.Indicator,
                         BackgroundTransparency = 1,
                         Size = UDim2.new(1, 0, 1, 0),
                         Font = Enum.Font.GothamBold,
-                        Text = "✓",
+                        Text = Library.Icons.Check,
                         TextColor3 = Library.Colors.Text,
                         TextSize = 12,
                         TextXAlignment = Enum.TextXAlignment.Center
@@ -630,8 +750,8 @@ function Library:CreateWindow(title, version)
                     Name = "Label",
                     Parent = toggle.Frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 25, 0, 0),
-                    Size = UDim2.new(1, -25, 1, 0),
+                    Position = UDim2.new(0, 30, 0, 0),
+                    Size = UDim2.new(1, -30, 1, 0),
                     Font = Enum.Font.Gotham,
                     Text = name,
                     TextColor3 = Library.Colors.Text,
@@ -641,34 +761,54 @@ function Library:CreateWindow(title, version)
                 
                 toggle.Value = default or false
                 
+                -- Enhanced toggle functionality
                 toggle.Button.MouseButton1Click:Connect(function()
                     toggle.Value = not toggle.Value
                     
                     if toggle.Value then
                         Library:Tween(toggle.Indicator, {BackgroundColor3 = Library.Colors.Primary}, 0.2)
-                        if not toggle.Indicator:FindFirstChild("Checkmark") then
-                            local checkmark = Library:CreateInstance("TextLabel", {
+                        Library:Tween(toggle.Indicator.UIStroke, {Color = Library.Colors.Primary}, 0.2)
+                        
+                        if not toggle.Checkmark then
+                            toggle.Checkmark = Library:CreateInstance("TextLabel", {
                                 Name = "Checkmark",
                                 Parent = toggle.Indicator,
                                 BackgroundTransparency = 1,
                                 Size = UDim2.new(1, 0, 1, 0),
                                 Font = Enum.Font.GothamBold,
-                                Text = "✓",
+                                Text = Library.Icons.Check,
                                 TextColor3 = Library.Colors.Text,
                                 TextSize = 12,
-                                TextXAlignment = Enum.TextXAlignment.Center
+                                TextXAlignment = Enum.TextXAlignment.Center,
+                                TextTransparency = 1
                             })
+                            
+                            Library:Tween(toggle.Checkmark, {TextTransparency = 0}, 0.2)
                         end
                     else
-                        Library:Tween(toggle.Indicator, {BackgroundColor3 = Library.Colors.BackgroundLight}, 0.2)
-                        if toggle.Indicator:FindFirstChild("Checkmark") then
-                            toggle.Indicator.Checkmark:Destroy()
+                        Library:Tween(toggle.Indicator, {BackgroundColor3 = Library.Colors.BackgroundTertiary}, 0.2)
+                        Library:Tween(toggle.Indicator.UIStroke, {Color = Library.Colors.Border}, 0.2)
+                        
+                        if toggle.Checkmark then
+                            Library:Tween(toggle.Checkmark, {TextTransparency = 1}, 0.2, nil, nil, function()
+                                toggle.Checkmark:Destroy()
+                                toggle.Checkmark = nil
+                            end)
                         end
                     end
                     
                     if callback then
                         callback(toggle.Value)
                     end
+                end)
+                
+                -- Hover effects
+                toggle.Button.MouseEnter:Connect(function()
+                    Library:Tween(toggle.Indicator, {Size = UDim2.new(0, 20, 0, 20)}, 0.2)
+                end)
+                
+                toggle.Button.MouseLeave:Connect(function()
+                    Library:Tween(toggle.Indicator, {Size = UDim2.new(0, 18, 0, 18)}, 0.2)
                 end)
                 
                 return toggle
@@ -681,7 +821,7 @@ function Library:CreateWindow(title, version)
                     Name = name .. "Slider",
                     Parent = self.Container,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 50),
+                    Size = UDim2.new(1, 0, 0, 55),
                     BorderSizePixel = 0
                 })
                 
@@ -697,7 +837,7 @@ function Library:CreateWindow(title, version)
                     Name = "Label",
                     Parent = slider.Header,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, -60, 1, 0),
+                    Size = UDim2.new(1, -70, 1, 0),
                     Font = Enum.Font.Gotham,
                     Text = name,
                     TextColor3 = Library.Colors.Text,
@@ -709,8 +849,8 @@ function Library:CreateWindow(title, version)
                     Name = "ValueLabel",
                     Parent = slider.Header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(1, -60, 0, 0),
-                    Size = UDim2.new(0, 60, 1, 0),
+                    Position = UDim2.new(1, -70, 0, 0),
+                    Size = UDim2.new(0, 70, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = tostring(default),
                     TextColor3 = Library.Colors.Primary,
@@ -718,17 +858,20 @@ function Library:CreateWindow(title, version)
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
                 
+                -- Enhanced slider track
                 slider.Track = Library:CreateInstance("Frame", {
                     Name = "Track",
                     Parent = slider.Frame,
-                    BackgroundColor3 = Library.Colors.BackgroundLight,
-                    Position = UDim2.new(0, 0, 0, 30),
-                    Size = UDim2.new(1, 0, 0, 6),
+                    BackgroundColor3 = Library.Colors.BackgroundTertiary,
+                    Position = UDim2.new(0, 0, 0, 35),
+                    Size = UDim2.new(1, 0, 0, 8),
                     BorderSizePixel = 0
                 })
                 
-                Library:CreateCorner(slider.Track, 3)
+                Library:CreateCorner(slider.Track, 4)
+                Library:CreateStroke(slider.Track, Library.Colors.Border, 1, 0.3)
                 
+                -- Enhanced slider fill with gradient
                 slider.Fill = Library:CreateInstance("Frame", {
                     Name = "Fill",
                     Parent = slider.Track,
@@ -737,8 +880,22 @@ function Library:CreateWindow(title, version)
                     BorderSizePixel = 0
                 })
                 
-                Library:CreateCorner(slider.Fill, 3)
+                Library:CreateCorner(slider.Fill, 4)
                 Library:CreateGradient(slider.Fill)
+                
+                -- Slider handle
+                slider.Handle = Library:CreateInstance("Frame", {
+                    Name = "Handle",
+                    Parent = slider.Track,
+                    BackgroundColor3 = Library.Colors.Text,
+                    Position = UDim2.new((default - min) / (max - min), -6, 0.5, -6),
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    Size = UDim2.new(0, 12, 0, 12),
+                    BorderSizePixel = 0
+                })
+                
+                Library:CreateCorner(slider.Handle, 6)
+                Library:CreateStroke(slider.Handle, Library.Colors.Primary, 2)
                 
                 slider.Button = Library:CreateInstance("TextButton", {
                     Name = "Button",
@@ -757,6 +914,7 @@ function Library:CreateWindow(title, version)
                     currentValue = math.floor(min + ((max - min) * pos) + 0.5)
                     
                     Library:Tween(slider.Fill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.1)
+                    Library:Tween(slider.Handle, {Position = UDim2.new(pos, -6, 0.5, -6)}, 0.1)
                     slider.ValueLabel.Text = tostring(currentValue)
                     
                     if callback then
@@ -768,12 +926,16 @@ function Library:CreateWindow(title, version)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         dragging = true
                         updateSlider(input)
+                        
+                        -- Visual feedback
+                        Library:Tween(slider.Handle, {Size = UDim2.new(0, 16, 0, 16)}, 0.2)
                     end
                 end)
                 
                 slider.Button.InputEnded:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         dragging = false
+                        Library:Tween(slider.Handle, {Size = UDim2.new(0, 12, 0, 12)}, 0.2)
                     end
                 end)
                 
@@ -793,7 +955,7 @@ function Library:CreateWindow(title, version)
                     Name = name .. "Dropdown",
                     Parent = self.Container,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 35),
+                    Size = UDim2.new(1, 0, 0, 40),
                     ClipsDescendants = true,
                     BorderSizePixel = 0
                 })
@@ -801,8 +963,8 @@ function Library:CreateWindow(title, version)
                 dropdown.Header = Library:CreateInstance("TextButton", {
                     Name = "Header",
                     Parent = dropdown.Frame,
-                    BackgroundColor3 = Library.Colors.BackgroundLight,
-                    Size = UDim2.new(1, 0, 0, 35),
+                    BackgroundColor3 = Library.Colors.BackgroundTertiary,
+                    Size = UDim2.new(1, 0, 0, 40),
                     Font = Enum.Font.Gotham,
                     Text = "",
                     TextColor3 = Library.Colors.Text,
@@ -811,7 +973,7 @@ function Library:CreateWindow(title, version)
                     AutoButtonColor = false
                 })
                 
-                Library:CreateCorner(dropdown.Header, 8)
+                Library:CreateCorner(dropdown.Header, 10)
                 Library:CreateStroke(dropdown.Header, Library.Colors.Border, 1, 0.3)
                 
                 dropdown.Label = Library:CreateInstance("TextLabel", {
@@ -832,10 +994,10 @@ function Library:CreateWindow(title, version)
                     Parent = dropdown.Header,
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0.5, 0, 0, 0),
-                    Size = UDim2.new(0.5, -30, 1, 0),
+                    Size = UDim2.new(0.5, -35, 1, 0),
                     Font = Enum.Font.Gotham,
                     Text = default or "Select...",
-                    TextColor3 = Library.Colors.TextSecondary,
+                    TextColor3 = default and Library.Colors.Text or Library.Colors.TextMuted,
                     TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
@@ -844,26 +1006,27 @@ function Library:CreateWindow(title, version)
                     Name = "Arrow",
                     Parent = dropdown.Header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(1, -25, 0, 0),
-                    Size = UDim2.new(0, 20, 1, 0),
+                    Position = UDim2.new(1, -30, 0, 0),
+                    Size = UDim2.new(0, 25, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = Library.Icons.ChevronDown,
                     TextColor3 = Library.Colors.Primary,
-                    TextSize = 16,
-                    TextXAlignment = Enum.TextXAlignment.Center
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    Rotation = 90
                 })
                 
                 dropdown.OptionsContainer = Library:CreateInstance("Frame", {
                     Name = "OptionsContainer",
                     Parent = dropdown.Frame,
-                    BackgroundColor3 = Library.Colors.BackgroundLight,
-                    Position = UDim2.new(0, 0, 0, 35),
-                    Size = UDim2.new(1, 0, 0, #options * 30),
+                    BackgroundColor3 = Library.Colors.BackgroundTertiary,
+                    Position = UDim2.new(0, 0, 0, 40),
+                    Size = UDim2.new(1, 0, 0, #options * 35),
                     Visible = false,
                     BorderSizePixel = 0
                 })
                 
-                Library:CreateCorner(dropdown.OptionsContainer, 8)
+                Library:CreateCorner(dropdown.OptionsContainer, 10)
                 Library:CreateStroke(dropdown.OptionsContainer, Library.Colors.Border, 1, 0.3)
                 
                 local optionsLayout = Library:CreateInstance("UIListLayout", {
@@ -877,12 +1040,12 @@ function Library:CreateWindow(title, version)
                     dropdown.IsOpen = not dropdown.IsOpen
                     
                     if dropdown.IsOpen then
-                        Library:Tween(dropdown.Arrow, {Rotation = 180}, 0.3)
-                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 35 + #options * 30)}, 0.3)
+                        Library:Tween(dropdown.Arrow, {Rotation = 270}, 0.3, Enum.EasingStyle.Back)
+                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 40 + #options * 35)}, 0.3, Enum.EasingStyle.Quart)
                         dropdown.OptionsContainer.Visible = true
                     else
-                        Library:Tween(dropdown.Arrow, {Rotation = 0}, 0.3)
-                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 35)}, 0.3)
+                        Library:Tween(dropdown.Arrow, {Rotation = 90}, 0.3, Enum.EasingStyle.Back)
+                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 40)}, 0.3, Enum.EasingStyle.Quart)
                         dropdown.OptionsContainer.Visible = false
                     end
                 end)
@@ -892,7 +1055,7 @@ function Library:CreateWindow(title, version)
                         Name = option .. "Option",
                         Parent = dropdown.OptionsContainer,
                         BackgroundTransparency = 1,
-                        Size = UDim2.new(1, 0, 0, 30),
+                        Size = UDim2.new(1, 0, 0, 35),
                         Font = Enum.Font.Gotham,
                         Text = option,
                         TextColor3 = Library.Colors.TextSecondary,
@@ -902,11 +1065,18 @@ function Library:CreateWindow(title, version)
                     })
                     
                     optionBtn.MouseEnter:Connect(function()
-                        Library:Tween(optionBtn, {BackgroundTransparency = 0.9, BackgroundColor3 = Library.Colors.Primary}, 0.2)
+                        Library:Tween(optionBtn, {
+                            BackgroundTransparency = 0.8, 
+                            BackgroundColor3 = Library.Colors.Primary,
+                            TextColor3 = Library.Colors.Text
+                        }, 0.2)
                     end)
                     
                     optionBtn.MouseLeave:Connect(function()
-                        Library:Tween(optionBtn, {BackgroundTransparency = 1}, 0.2)
+                        Library:Tween(optionBtn, {
+                            BackgroundTransparency = 1,
+                            TextColor3 = Library.Colors.TextSecondary
+                        }, 0.2)
                     end)
                     
                     optionBtn.MouseButton1Click:Connect(function()
@@ -914,8 +1084,8 @@ function Library:CreateWindow(title, version)
                         dropdown.Selected.TextColor3 = Library.Colors.Text
                         dropdown.IsOpen = false
                         
-                        Library:Tween(dropdown.Arrow, {Rotation = 0}, 0.3)
-                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 35)}, 0.3)
+                        Library:Tween(dropdown.Arrow, {Rotation = 90}, 0.3, Enum.EasingStyle.Back)
+                        Library:Tween(dropdown.Frame, {Size = UDim2.new(1, 0, 0, 40)}, 0.3, Enum.EasingStyle.Quart)
                         dropdown.OptionsContainer.Visible = false
                         
                         if callback then
@@ -934,7 +1104,7 @@ function Library:CreateWindow(title, version)
                     Name = name .. "Button",
                     Parent = self.Container,
                     BackgroundColor3 = Library.Colors.Primary,
-                    Size = UDim2.new(1, 0, 0, 35),
+                    Size = UDim2.new(1, 0, 0, 40),
                     Font = Enum.Font.GothamSemibold,
                     Text = name,
                     TextColor3 = Library.Colors.Text,
@@ -943,23 +1113,26 @@ function Library:CreateWindow(title, version)
                     AutoButtonColor = false
                 })
                 
-                Library:CreateCorner(button.Frame, 8)
+                Library:CreateCorner(button.Frame, 10)
                 Library:CreateGradient(button.Frame)
+                Library:CreateStroke(button.Frame, Library.Colors.Primary, 1, 0.5)
                 
                 button.Frame.MouseEnter:Connect(function()
                     Library:Tween(button.Frame, {BackgroundColor3 = Library.Colors.Secondary}, 0.2)
+                    Library:Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 42)}, 0.2)
                 end)
                 
                 button.Frame.MouseLeave:Connect(function()
                     Library:Tween(button.Frame, {BackgroundColor3 = Library.Colors.Primary}, 0.2)
+                    Library:Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 40)}, 0.2)
                 end)
                 
                 button.Frame.MouseButton1Down:Connect(function()
-                    Library:Tween(button.Frame, {Size = UDim2.new(1, -4, 0, 31)}, 0.1)
+                    Library:Tween(button.Frame, {Size = UDim2.new(1, -4, 0, 36)}, 0.1)
                 end)
                 
                 button.Frame.MouseButton1Up:Connect(function()
-                    Library:Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 35)}, 0.1)
+                    Library:Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 40)}, 0.1)
                 end)
                 
                 button.Frame.MouseButton1Click:Connect(function()
@@ -977,24 +1150,40 @@ function Library:CreateWindow(title, version)
         return tab
     end
     
+    -- Enhanced Tab Selection with smooth connection animation
     function window:SelectTab(tab)
         -- Deselect current tab
         if self.CurrentTab then
-            Library:Tween(self.CurrentTab.NavButton, {BackgroundColor3 = Library.Colors.BackgroundLighter}, 0.2)
-            Library:Tween(self.CurrentTab.Icon, {TextColor3 = Library.Colors.TextSecondary}, 0.2)
-            Library:Tween(self.CurrentTab.Label, {TextColor3 = Library.Colors.TextSecondary}, 0.2)
-            self.CurrentTab.Content.Visible = false
+            Library:Tween(self.CurrentTab.NavButton, {BackgroundColor3 = Library.Colors.BackgroundTertiary}, 0.3)
+            Library:Tween(self.CurrentTab.Icon, {TextColor3 = Library.Colors.TextMuted}, 0.3)
+            Library:Tween(self.CurrentTab.Label, {TextColor3 = Library.Colors.TextMuted}, 0.3)
+            Library:Tween(self.CurrentTab.SelectionIndicator, {Size = UDim2.new(0, 0, 1, 0)}, 0.3)
+            Library:Tween(self.CurrentTab.NavButton.UIStroke, {Color = Library.Colors.Border}, 0.3)
+            
+            -- Fade out current content
+            Library:Tween(self.CurrentTab.Content, {BackgroundTransparency = 1}, 0.2, nil, nil, function()
+                self.CurrentTab.Content.Visible = false
+            end)
         end
         
-        -- Select new tab
+        -- Select new tab with enhanced animation
         self.CurrentTab = tab
-        Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.Primary}, 0.2)
-        Library:Tween(tab.Icon, {TextColor3 = Library.Colors.Text}, 0.2)
-        Library:Tween(tab.Label, {TextColor3 = Library.Colors.Text}, 0.2)
-        tab.Content.Visible = true
+        Library:Tween(tab.NavButton, {BackgroundColor3 = Library.Colors.Active}, 0.3)
+        Library:Tween(tab.Icon, {TextColor3 = Library.Colors.Primary}, 0.3)
+        Library:Tween(tab.Label, {TextColor3 = Library.Colors.Text}, 0.3)
+        Library:Tween(tab.SelectionIndicator, {Size = UDim2.new(0, 4, 1, 0)}, 0.3, Enum.EasingStyle.Back)
+        Library:Tween(tab.NavButton.UIStroke, {Color = Library.Colors.Primary}, 0.3)
         
-        -- Update content title
-        self.ContentTitle.Text = tab.Label.Text
+        -- Fade in new content
+        tab.Content.Visible = true
+        tab.Content.BackgroundTransparency = 1
+        Library:Tween(tab.Content, {BackgroundTransparency = 0}, 0.3)
+        
+        -- Update content title with animation
+        Library:Tween(self.ContentTitle, {TextTransparency = 1}, 0.15, nil, nil, function()
+            self.ContentTitle.Text = tab.Label.Text
+            Library:Tween(self.ContentTitle, {TextTransparency = 0}, 0.15)
+        end)
     end
     
     function window:CreateNotification(title, message, duration, type)
@@ -1009,15 +1198,16 @@ function Library:CreateWindow(title, version)
         notification.Frame = Library:CreateInstance("Frame", {
             Name = "Notification",
             Parent = self.ScreenGui,
-            BackgroundColor3 = Library.Colors.BackgroundLighter,
-            Position = UDim2.new(1, -350, 1, 20),
-            Size = UDim2.new(0, 330, 0, 80),
+            BackgroundColor3 = Library.Colors.BackgroundSecondary,
+            Position = UDim2.new(1, -370, 1, 20),
+            Size = UDim2.new(0, 350, 0, 90),
             BorderSizePixel = 0,
             AnchorPoint = Vector2.new(0, 1)
         })
         
-        Library:CreateCorner(notification.Frame, 10)
+        Library:CreateCorner(notification.Frame, 12)
         Library:CreateStroke(notification.Frame, color, 2)
+        Library:CreateDropShadow(notification.Frame, 6, 0.5)
         
         notification.ColorBar = Library:CreateInstance("Frame", {
             Name = "ColorBar",
@@ -1027,11 +1217,13 @@ function Library:CreateWindow(title, version)
             BorderSizePixel = 0
         })
         
+        Library:CreateCorner(notification.ColorBar, 2)
+        
         notification.Title = Library:CreateInstance("TextLabel", {
             Name = "Title",
             Parent = notification.Frame,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 20, 0, 10),
+            Position = UDim2.new(0, 20, 0, 15),
             Size = UDim2.new(1, -40, 0, 25),
             Font = Enum.Font.GothamBold,
             Text = title,
@@ -1044,7 +1236,7 @@ function Library:CreateWindow(title, version)
             Name = "Message",
             Parent = notification.Frame,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 20, 0, 35),
+            Position = UDim2.new(0, 20, 0, 40),
             Size = UDim2.new(1, -40, 0, 35),
             Font = Enum.Font.Gotham,
             Text = message,
@@ -1055,10 +1247,14 @@ function Library:CreateWindow(title, version)
             TextYAlignment = Enum.TextYAlignment.Top
         })
         
-        Library:Tween(notification.Frame, {Position = UDim2.new(1, -350, 1, -100)}, 0.5, Enum.EasingStyle.Back)
+        -- Enhanced entrance animation
+        Library:Tween(notification.Frame, {Position = UDim2.new(1, -370, 1, -110)}, 0.5, Enum.EasingStyle.Back)
         
         task.delay(duration or 4, function()
-            Library:Tween(notification.Frame, {Position = UDim2.new(1, -350, 1, 20)}, 0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In, function()
+            Library:Tween(notification.Frame, {
+                Position = UDim2.new(1, -370, 1, 20),
+                BackgroundTransparency = 1
+            }, 0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In, function()
                 notification.Frame:Destroy()
             end)
         end)
@@ -1066,9 +1262,14 @@ function Library:CreateWindow(title, version)
         return notification
     end
     
-    -- Entrance animation
+    -- Enhanced entrance animation
     window.MainFrame.Size = UDim2.new(0, 0, 0, 0)
-    Library:Tween(window.MainFrame, {Size = UDim2.new(0, 900, 0, 600)}, 0.5, Enum.EasingStyle.Back)
+    window.MainFrame.BackgroundTransparency = 1
+    
+    Library:Tween(window.MainFrame, {
+        Size = UDim2.new(0, 950, 0, 650),
+        BackgroundTransparency = 0
+    }, 0.6, Enum.EasingStyle.Back)
     
     return window
 end
