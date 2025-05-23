@@ -3,32 +3,35 @@ local rs = game:GetService("RunService");
 
 local elements = {};
 
-function elements.createTabHandler(tabFrame, pageFrame)
-    local selected;
-    local tabs = {};
+function elements.createTabHandler(tabContainer, pageContainer)
+    local firstTab = true;
+    local win = {};
     
-    local function createTab(name)
+    function win:tab(name)
         local tab = Instance.new("TextButton");
         local page = Instance.new("ScrollingFrame");
         local list = Instance.new("UIListLayout");
         
         tab.Name = name;
-        tab.Parent = tabFrame;
-        tab.BackgroundTransparency = 1;
+        tab.Parent = tabContainer;
+        tab.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+        tab.BackgroundTransparency = 0.1;
+        tab.BorderSizePixel = 0;
         tab.Size = UDim2.new(1, 0, 0, 30);
         tab.Font = Enum.Font.GothamBold;
         tab.Text = name;
         tab.TextColor3 = Color3.fromRGB(255, 255, 255);
         tab.TextSize = 12;
+        tab.AutoButtonColor = false;
         
         page.Name = name;
-        page.Parent = pageFrame;
+        page.Parent = pageContainer;
         page.BackgroundTransparency = 1;
         page.BorderSizePixel = 0;
         page.Size = UDim2.new(1, 0, 1, 0);
         page.CanvasSize = UDim2.new(0, 0, 0, 0);
         page.ScrollBarThickness = 2;
-        page.Visible = false;
+        page.Visible = firstTab;
         
         list.Parent = page;
         list.SortOrder = Enum.SortOrder.LayoutOrder;
@@ -38,34 +41,35 @@ function elements.createTabHandler(tabFrame, pageFrame)
             page.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y);
         end);
         
+        if firstTab then
+            tab.BackgroundTransparency = 0;
+            firstTab = false;
+        end;
+        
         tab.MouseButton1Click:Connect(function()
-            if selected then
-                selected.page.Visible = false;
-                ts:Create(selected.tab, TweenInfo.new(0.2), {
-                    BackgroundTransparency = 1
-                }):Play();
+            for _, v in pairs(pageContainer:GetChildren()) do
+                if v:IsA("ScrollingFrame") then
+                    v.Visible = false;
+                end;
             end;
             
-            selected = tabs[name];
+            for _, v in pairs(tabContainer:GetChildren()) do
+                if v:IsA("TextButton") then
+                    ts:Create(v, TweenInfo.new(0.2), {
+                        BackgroundTransparency = 0.1
+                    }):Play();
+                end;
+            end;
+            
             page.Visible = true;
             ts:Create(tab, TweenInfo.new(0.2), {
-                BackgroundTransparency = 0.9
+                BackgroundTransparency = 0
             }):Play();
         end);
         
-        tabs[name] = {
-            tab = tab,
-            page = page,
-            list = list
-        };
+        local tabContent = {};
         
-        if not selected then
-            selected = tabs[name];
-            page.Visible = true;
-            tab.BackgroundTransparency = 0.9;
-        end;
-        
-        local function addButton(text, callback)
+        function tabContent:btn(text, callback)
             local button = Instance.new("TextButton");
             local outline = Instance.new("UIStroke");
             local outlineGradient = Instance.new("UIGradient");
@@ -74,7 +78,7 @@ function elements.createTabHandler(tabFrame, pageFrame)
             button.Parent = page;
             button.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
             button.BorderSizePixel = 0;
-            button.Size = UDim2.new(1, 0, 0, 30);
+            button.Size = UDim2.new(1, -10, 0, 30);
             button.Font = Enum.Font.GothamBold;
             button.Text = text;
             button.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -111,9 +115,11 @@ function elements.createTabHandler(tabFrame, pageFrame)
             end);
             
             button.MouseButton1Click:Connect(callback);
+            
+            return button;
         end;
         
-        local function addSeparator(text)
+        function tabContent:sep(text)
             local sep = Instance.new("Frame");
             local label = Instance.new("TextLabel");
             local left = Instance.new("Frame");
@@ -124,14 +130,14 @@ function elements.createTabHandler(tabFrame, pageFrame)
             sep.Name = "separator";
             sep.Parent = page;
             sep.BackgroundTransparency = 1;
-            sep.Size = UDim2.new(1, 0, 0, 20);
+            sep.Size = UDim2.new(1, -10, 0, 20);
             
             label.Parent = sep;
             label.BackgroundTransparency = 1;
             label.Position = UDim2.new(0.5, -50, 0, 0);
             label.Size = UDim2.new(0, 100, 1, 0);
             label.Font = Enum.Font.GothamBold;
-            label.Text = text;
+            label.Text = text or "•";
             label.TextColor3 = Color3.fromRGB(255, 255, 255);
             label.TextSize = 12;
             
@@ -165,17 +171,14 @@ function elements.createTabHandler(tabFrame, pageFrame)
                 leftGrad.Offset = Vector2.new(offset, 0);
                 rightGrad.Offset = Vector2.new(offset, 0);
             end);
+            
+            return sep;
         end;
         
-        return {
-            addButton = addButton,
-            addSeparator = addSeparator
-        };
+        return tabContent;
     end;
     
-    return {
-        createTab = createTab
-    };
+    return win;
 end;
 
 return elements;
