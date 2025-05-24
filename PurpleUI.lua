@@ -1,32 +1,31 @@
--- Modern Purple UI Library for Roblox (Enhanced Version)
--- Load with: loadstring(game:HttpGet("YOUR_GITHUB_RAW_URL"))()
+-- SolisHub UI Library
+-- Modern Purple-themed Roblox GUI Library
+-- Usage: loadstring(game:HttpGet("https://raw.githubusercontent.com/your-repo/ui-lib/main.lua"))()
 
-local PurpleUI = {}
+local SolisUI = {}
+SolisUI.__index = SolisUI
 
 -- Services
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- Theme Configuration
 local Theme = {
-    Background = Color3.fromRGB(15, 15, 20),
-    BackgroundSecondary = Color3.fromRGB(25, 25, 35),
-    BackgroundTertiary = Color3.fromRGB(35, 35, 45),
-    Primary = Color3.fromRGB(138, 43, 226), -- Purple
-    PrimaryHover = Color3.fromRGB(148, 53, 236),
-    Secondary = Color3.fromRGB(75, 85, 99),
+    Background = Color3.fromRGB(25, 25, 35),
+    Secondary = Color3.fromRGB(35, 35, 45),
+    Accent = Color3.fromRGB(138, 43, 226),
+    AccentHover = Color3.fromRGB(148, 53, 236),
     Text = Color3.fromRGB(255, 255, 255),
-    TextSecondary = Color3.fromRGB(156, 163, 175),
-    Border = Color3.fromRGB(55, 65, 81),
-    Success = Color3.fromRGB(34, 197, 94),
-    Warning = Color3.fromRGB(251, 191, 36),
-    Error = Color3.fromRGB(239, 68, 68),
-    Separator = Color3.fromRGB(45, 55, 75)
+    TextSecondary = Color3.fromRGB(180, 180, 180),
+    Border = Color3.fromRGB(55, 55, 65),
+    Success = Color3.fromRGB(46, 204, 113),
+    Warning = Color3.fromRGB(241, 196, 15),
+    Error = Color3.fromRGB(231, 76, 60)
 }
 
 -- Utility Functions
@@ -40,13 +39,6 @@ local function CreateTween(object, properties, duration, easingStyle, easingDire
     return tween
 end
 
-local function CreateBlur(parent, intensity)
-    local blur = Instance.new("BlurEffect")
-    blur.Size = intensity or 15
-    blur.Parent = parent
-    return blur
-end
-
 local function CreateCorner(parent, radius)
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, radius or 8)
@@ -54,200 +46,520 @@ local function CreateCorner(parent, radius)
     return corner
 end
 
-local function CreateStroke(parent, thickness, color, transparency)
+local function CreateStroke(parent, color, thickness)
     local stroke = Instance.new("UIStroke")
-    stroke.Thickness = thickness or 1
     stroke.Color = color or Theme.Border
-    stroke.Transparency = transparency or 0
+    stroke.Thickness = thickness or 1
     stroke.Parent = parent
     return stroke
 end
 
-local function CreateGradient(parent, colors, rotation)
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = colors or ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Theme.Primary),
-        ColorSequenceKeypoint.new(1, Theme.PrimaryHover)
-    }
-    gradient.Rotation = rotation or 0
-    gradient.Parent = parent
-    return gradient
+-- Main UI Class
+function SolisUI.new(title)
+    local self = setmetatable({}, SolisUI)
+    
+    self.Title = title or "SolisHub"
+    self.Tabs = {}
+    self.CurrentTab = nil
+    
+    self:CreateMainFrame()
+    self:CreateTitleBar()
+    self:CreateTabContainer()
+    self:CreateContentContainer()
+    
+    return self
 end
 
-local function AnimateGradient(gradient)
-    local rotationTween = TweenService:Create(gradient, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
-        Rotation = 360
-    })
-    rotationTween:Play()
-    return rotationTween
-end
-
--- Main Window Class
-function PurpleUI:CreateWindow(config)
-    config = config or {}
-    local windowTitle = config.Title or "Purple UI"
-    local windowSize = config.Size or UDim2.new(0, 700, 0, 500)
+function SolisUI:CreateMainFrame()
+    -- Destroy existing GUI
+    if PlayerGui:FindFirstChild("SolisUI") then
+        PlayerGui.SolisUI:Destroy()
+    end
     
-    -- Create ScreenGui
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "PurpleUI_" .. windowTitle
-    screenGui.ResetOnSpawn = false
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    screenGui.Parent = PlayerGui
-    
-    -- Background Blur
-    local blurFrame = Instance.new("Frame")
-    blurFrame.Name = "BlurBackground"
-    blurFrame.Size = UDim2.new(1, 0, 1, 0)
-    blurFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    blurFrame.BackgroundTransparency = 0.3
-    blurFrame.BorderSizePixel = 0
-    blurFrame.Parent = screenGui
-    
-    CreateBlur(game.Lighting, 15)
+    -- Main ScreenGui
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = "SolisUI"
+    self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.Parent = PlayerGui
     
     -- Main Frame
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainFrame"
-    mainFrame.Size = windowSize
-    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    mainFrame.BackgroundColor3 = Theme.Background
-    mainFrame.BackgroundTransparency = 0.05
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = screenGui
+    self.MainFrame = Instance.new("Frame")
+    self.MainFrame.Name = "MainFrame"
+    self.MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    self.MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    self.MainFrame.BackgroundColor3 = Theme.Background
+    self.MainFrame.BorderSizePixel = 0
+    self.MainFrame.Parent = self.ScreenGui
     
-    CreateCorner(mainFrame, 12)
-    CreateStroke(mainFrame, 1, Theme.Border, 0.5)
+    CreateCorner(self.MainFrame, 12)
+    CreateStroke(self.MainFrame, Theme.Border, 2)
     
-    -- Title Bar
-    local titleBar = Instance.new("Frame")
-    titleBar.Name = "TitleBar"
-    titleBar.Size = UDim2.new(1, 0, 0, 35)
-    titleBar.BackgroundColor3 = Theme.BackgroundSecondary
-    titleBar.BackgroundTransparency = 0.1
-    titleBar.BorderSizePixel = 0
-    titleBar.Parent = mainFrame
+    -- Make draggable
+    self:MakeDraggable(self.MainFrame)
+end
+
+function SolisUI:CreateTitleBar()
+    self.TitleBar = Instance.new("Frame")
+    self.TitleBar.Name = "TitleBar"
+    self.TitleBar.Size = UDim2.new(1, 0, 0, 40)
+    self.TitleBar.Position = UDim2.new(0, 0, 0, 0)
+    self.TitleBar.BackgroundColor3 = Theme.Secondary
+    self.TitleBar.BorderSizePixel = 0
+    self.TitleBar.Parent = self.MainFrame
     
-    CreateCorner(titleBar, 12)
-    local titleGradient = CreateGradient(titleBar, ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Theme.Primary),
-        ColorSequenceKeypoint.new(0.5, Theme.BackgroundSecondary),
-        ColorSequenceKeypoint.new(1, Theme.Primary)
-    }, 45)
-    AnimateGradient(titleGradient)
+    CreateCorner(self.TitleBar, 12)
     
     -- Title Text
     local titleText = Instance.new("TextLabel")
     titleText.Name = "TitleText"
-    titleText.Size = UDim2.new(1, -50, 1, 0)
+    titleText.Size = UDim2.new(1, -100, 1, 0)
     titleText.Position = UDim2.new(0, 15, 0, 0)
     titleText.BackgroundTransparency = 1
-    titleText.Text = windowTitle
+    titleText.Text = "← " .. self.Title
     titleText.TextColor3 = Theme.Text
-    titleText.TextSize = 14
+    titleText.TextSize = 16
     titleText.TextXAlignment = Enum.TextXAlignment.Left
     titleText.Font = Enum.Font.GothamBold
-    titleText.Parent = titleBar
+    titleText.Parent = self.TitleBar
     
     -- Close Button
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
-    closeButton.Size = UDim2.new(0, 25, 0, 25)
-    closeButton.Position = UDim2.new(1, -30, 0, 5)
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -40, 0, 5)
     closeButton.BackgroundColor3 = Theme.Error
-    closeButton.BackgroundTransparency = 0.2
-    closeButton.BorderSizePixel = 0
     closeButton.Text = "×"
     closeButton.TextColor3 = Theme.Text
-    closeButton.TextSize = 16
+    closeButton.TextSize = 18
     closeButton.Font = Enum.Font.GothamBold
-    closeButton.Parent = titleBar
+    closeButton.BorderSizePixel = 0
+    closeButton.Parent = self.TitleBar
     
-    CreateCorner(closeButton, 4)
+    CreateCorner(closeButton, 6)
     
     closeButton.MouseButton1Click:Connect(function()
-        CreateTween(mainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.3)
-        wait(0.3)
-        screenGui:Destroy()
+        self:Destroy()
     end)
     
-    -- Main Container
-    local mainContainer = Instance.new("Frame")
-    mainContainer.Name = "MainContainer"
-    mainContainer.Size = UDim2.new(1, 0, 1, -35)
-    mainContainer.Position = UDim2.new(0, 0, 0, 35)
-    mainContainer.BackgroundTransparency = 1
-    mainContainer.Parent = mainFrame
+    -- Hover effect for close button
+    closeButton.MouseEnter:Connect(function()
+        CreateTween(closeButton, {BackgroundColor3 = Color3.fromRGB(255, 100, 100)})
+    end)
     
-    -- Left Sidebar (Tabs)
-    local sidebar = Instance.new("Frame")
-    sidebar.Name = "Sidebar"
-    sidebar.Size = UDim2.new(0, 180, 1, 0)
-    sidebar.BackgroundColor3 = Theme.BackgroundSecondary
-    sidebar.BackgroundTransparency = 0.1
-    sidebar.BorderSizePixel = 0
-    sidebar.Parent = mainContainer
+    closeButton.MouseLeave:Connect(function()
+        CreateTween(closeButton, {BackgroundColor3 = Theme.Error})
+    end)
+end
+
+function SolisUI:CreateTabContainer()
+    self.TabContainer = Instance.new("Frame")
+    self.TabContainer.Name = "TabContainer"
+    self.TabContainer.Size = UDim2.new(0, 150, 1, -50)
+    self.TabContainer.Position = UDim2.new(0, 10, 0, 50)
+    self.TabContainer.BackgroundColor3 = Theme.Secondary
+    self.TabContainer.BorderSizePixel = 0
+    self.TabContainer.Parent = self.MainFrame
     
-    CreateCorner(sidebar, 8)
-    CreateStroke(sidebar, 1, Theme.Border, 0.7)
+    CreateCorner(self.TabContainer, 8)
     
-    local sidebarLayout = Instance.new("UIListLayout")
-    sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    sidebarLayout.Padding = UDim.new(0, 2)
-    sidebarLayout.Parent = sidebar
+    -- Tab List Layout
+    local tabListLayout = Instance.new("UIListLayout")
+    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabListLayout.Padding = UDim.new(0, 5)
+    tabListLayout.Parent = self.TabContainer
     
-    -- Content Area
-    local contentArea = Instance.new("Frame")
-    contentArea.Name = "ContentArea"
-    contentArea.Size = UDim2.new(1, -190, 1, 0)
-    contentArea.Position = UDim2.new(0, 190, 0, 0)
-    contentArea.BackgroundColor3 = Theme.BackgroundTertiary
-    contentArea.BackgroundTransparency = 0.1
-    contentArea.BorderSizePixel = 0
-    contentArea.Parent = mainContainer
+    local tabPadding = Instance.new("UIPadding")
+    tabPadding.PaddingTop = UDim.new(0, 10)
+    tabPadding.PaddingLeft = UDim.new(0, 10)
+    tabPadding.PaddingRight = UDim.new(0, 10)
+    tabPadding.Parent = self.TabContainer
+end
+
+function SolisUI:CreateContentContainer()
+    self.ContentContainer = Instance.new("Frame")
+    self.ContentContainer.Name = "ContentContainer"
+    self.ContentContainer.Size = UDim2.new(1, -180, 1, -50)
+    self.ContentContainer.Position = UDim2.new(0, 170, 0, 50)
+    self.ContentContainer.BackgroundTransparency = 1
+    self.ContentContainer.BorderSizePixel = 0
+    self.ContentContainer.Parent = self.MainFrame
+end
+
+function SolisUI:CreateTab(name)
+    local tab = {
+        Name = name,
+        Elements = {},
+        Frame = nil,
+        Button = nil
+    }
     
-    CreateCorner(contentArea, 8)
-    CreateStroke(contentArea, 1, Theme.Border, 0.7)
+    -- Tab Button
+    tab.Button = Instance.new("TextButton")
+    tab.Button.Name = name .. "Tab"
+    tab.Button.Size = UDim2.new(1, 0, 0, 35)
+    tab.Button.BackgroundColor3 = Theme.Background
+    tab.Button.Text = name
+    tab.Button.TextColor3 = Theme.TextSecondary
+    tab.Button.TextSize = 14
+    tab.Button.Font = Enum.Font.Gotham
+    tab.Button.BorderSizePixel = 0
+    tab.Button.Parent = self.TabContainer
     
-    -- Content Scroll Frame
-    local contentScroll = Instance.new("ScrollingFrame")
-    contentScroll.Name = "ContentScroll"
-    contentScroll.Size = UDim2.new(1, -20, 1, -20)
-    contentScroll.Position = UDim2.new(0, 10, 0, 10)
-    contentScroll.BackgroundTransparency = 1
-    contentScroll.BorderSizePixel = 0
-    contentScroll.ScrollBarThickness = 4
-    contentScroll.ScrollBarImageColor3 = Theme.Primary
-    contentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    contentScroll.Parent = contentArea
+    CreateCorner(tab.Button, 6)
     
+    -- Tab Content Frame
+    tab.Frame = Instance.new("ScrollingFrame")
+    tab.Frame.Name = name .. "Content"
+    tab.Frame.Size = UDim2.new(1, 0, 1, 0)
+    tab.Frame.Position = UDim2.new(0, 0, 0, 0)
+    tab.Frame.BackgroundTransparency = 1
+    tab.Frame.BorderSizePixel = 0
+    tab.Frame.ScrollBarThickness = 6
+    tab.Frame.ScrollBarImageColor3 = Theme.Accent
+    tab.Frame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    tab.Frame.Visible = false
+    tab.Frame.Parent = self.ContentContainer
+    
+    -- Content Layout
     local contentLayout = Instance.new("UIListLayout")
     contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Padding = UDim.new(0, 8)
-    contentLayout.Parent = contentScroll
+    contentLayout.Padding = UDim.new(0, 10)
+    contentLayout.Parent = tab.Frame
     
+    local contentPadding = Instance.new("UIPadding")
+    contentPadding.PaddingTop = UDim.new(0, 10)
+    contentPadding.PaddingLeft = UDim.new(0, 10)
+    contentPadding.PaddingRight = UDim.new(0, 10)
+    contentPadding.PaddingBottom = UDim.new(0, 10)
+    contentPadding.Parent = tab.Frame
+    
+    -- Auto-resize canvas
     contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        contentScroll.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+        tab.Frame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
     end)
     
-    -- Dragging functionality
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
+    -- Tab Button Click
+    tab.Button.MouseButton1Click:Connect(function()
+        self:SwitchTab(name)
+    end)
     
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
+    -- Hover effects
+    tab.Button.MouseEnter:Connect(function()
+        if self.CurrentTab ~= name then
+            CreateTween(tab.Button, {BackgroundColor3 = Theme.Border})
         end
     end)
     
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    tab.Button.MouseLeave:Connect(function()
+        if self.CurrentTab ~= name then
+            CreateTween(tab.Button, {BackgroundColor3 = Theme.Background})
+        end
+    end)
+    
+    self.Tabs[name] = tab
+    
+    -- Auto-select first tab
+    if not self.CurrentTab then
+        self:SwitchTab(name)
+    end
+    
+    return tab
+end
+
+function SolisUI:SwitchTab(name)
+    if not self.Tabs[name] then return end
+    
+    -- Hide current tab
+    if self.CurrentTab and self.Tabs[self.CurrentTab] then
+        self.Tabs[self.CurrentTab].Frame.Visible = false
+        CreateTween(self.Tabs[self.CurrentTab].Button, {
+            BackgroundColor3 = Theme.Background,
+            TextColor3 = Theme.TextSecondary
+        })
+    end
+    
+    -- Show new tab
+    self.CurrentTab = name
+    self.Tabs[name].Frame.Visible = true
+    CreateTween(self.Tabs[name].Button, {
+        BackgroundColor3 = Theme.Accent,
+        TextColor3 = Theme.Text
+    })
+end
+
+-- UI Elements
+function SolisUI:CreateSection(tab, title)
+    if not self.Tabs[tab] then return end
+    
+    local section = Instance.new("Frame")
+    section.Name = title .. "Section"
+    section.Size = UDim2.new(1, 0, 0, 40)
+    section.BackgroundColor3 = Theme.Secondary
+    section.BorderSizePixel = 0
+    section.Parent = self.Tabs[tab].Frame
+    
+    CreateCorner(section, 8)
+    
+    local sectionTitle = Instance.new("TextLabel")
+    sectionTitle.Name = "SectionTitle"
+    sectionTitle.Size = UDim2.new(1, -20, 1, 0)
+    sectionTitle.Position = UDim2.new(0, 15, 0, 0)
+    sectionTitle.BackgroundTransparency = 1
+    sectionTitle.Text = title
+    sectionTitle.TextColor3 = Theme.Text
+    sectionTitle.TextSize = 16
+    sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+    sectionTitle.Font = Enum.Font.GothamBold
+    sectionTitle.Parent = section
+    
+    return section
+end
+
+function SolisUI:CreateToggle(tab, text, default, callback)
+    if not self.Tabs[tab] then return end
+    
+    local toggle = Instance.new("Frame")
+    toggle.Name = text .. "Toggle"
+    toggle.Size = UDim2.new(1, 0, 0, 40)
+    toggle.BackgroundColor3 = Theme.Secondary
+    toggle.BorderSizePixel = 0
+    toggle.Parent = self.Tabs[tab].Frame
+    
+    CreateCorner(toggle, 8)
+    
+    local toggleText = Instance.new("TextLabel")
+    toggleText.Name = "ToggleText"
+    toggleText.Size = UDim2.new(1, -80, 1, 0)
+    toggleText.Position = UDim2.new(0, 15, 0, 0)
+    toggleText.BackgroundTransparency = 1
+    toggleText.Text = text
+    toggleText.TextColor3 = Theme.Text
+    toggleText.TextSize = 14
+    toggleText.TextXAlignment = Enum.TextXAlignment.Left
+    toggleText.Font = Enum.Font.Gotham
+    toggleText.Parent = toggle
+    
+    -- Toggle Switch
+    local toggleSwitch = Instance.new("Frame")
+    toggleSwitch.Name = "ToggleSwitch"
+    toggleSwitch.Size = UDim2.new(0, 50, 0, 25)
+    toggleSwitch.Position = UDim2.new(1, -65, 0.5, -12.5)
+    toggleSwitch.BackgroundColor3 = default and Theme.Accent or Theme.Border
+    toggleSwitch.BorderSizePixel = 0
+    toggleSwitch.Parent = toggle
+    
+    CreateCorner(toggleSwitch, 12)
+    
+    local toggleButton = Instance.new("Frame")
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Size = UDim2.new(0, 21, 0, 21)
+    toggleButton.Position = default and UDim2.new(0, 27, 0, 2) or UDim2.new(0, 2, 0, 2)
+    toggleButton.BackgroundColor3 = Theme.Text
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Parent = toggleSwitch
+    
+    CreateCorner(toggleButton, 10)
+    
+    local isToggled = default or false
+    
+    local function updateToggle()
+        CreateTween(toggleSwitch, {BackgroundColor3 = isToggled and Theme.Accent or Theme.Border})
+        CreateTween(toggleButton, {Position = isToggled and UDim2.new(0, 27, 0, 2) or UDim2.new(0, 2, 0, 2)})
+        
+        if callback then
+            callback(isToggled)
+        end
+    end
+    
+    local toggleClickDetector = Instance.new("TextButton")
+    toggleClickDetector.Size = UDim2.new(1, 0, 1, 0)
+    toggleClickDetector.BackgroundTransparency = 1
+    toggleClickDetector.Text = ""
+    toggleClickDetector.Parent = toggle
+    
+    toggleClickDetector.MouseButton1Click:Connect(function()
+        isToggled = not isToggled
+        updateToggle()
+    end)
+    
+    return {
+        Frame = toggle,
+        SetValue = function(value)
+            isToggled = value
+            updateToggle()
+        end,
+        GetValue = function()
+            return isToggled
+        end
+    }
+end
+
+function SolisUI:CreateButton(tab, text, callback)
+    if not self.Tabs[tab] then return end
+    
+    local button = Instance.new("TextButton")
+    button.Name = text .. "Button"
+    button.Size = UDim2.new(1, 0, 0, 40)
+    button.BackgroundColor3 = Theme.Accent
+    button.Text = text
+    button.TextColor3 = Theme.Text
+    button.TextSize = 14
+    button.Font = Enum.Font.GothamBold
+    button.BorderSizePixel = 0
+    button.Parent = self.Tabs[tab].Frame
+    
+    CreateCorner(button, 8)
+    
+    button.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
+    
+    button.MouseEnter:Connect(function()
+        CreateTween(button, {BackgroundColor3 = Theme.AccentHover})
+    end)
+    
+    button.MouseLeave:Connect(function()
+        CreateTween(button, {BackgroundColor3 = Theme.Accent})
+    end)
+    
+    return button
+end
+
+function SolisUI:CreateDropdown(tab, text, options, default, callback)
+    if not self.Tabs[tab] then return end
+    
+    local dropdown = Instance.new("Frame")
+    dropdown.Name = text .. "Dropdown"
+    dropdown.Size = UDim2.new(1, 0, 0, 40)
+    dropdown.BackgroundColor3 = Theme.Secondary
+    dropdown.BorderSizePixel = 0
+    dropdown.Parent = self.Tabs[tab].Frame
+    
+    CreateCorner(dropdown, 8)
+    
+    local dropdownText = Instance.new("TextLabel")
+    dropdownText.Name = "DropdownText"
+    dropdownText.Size = UDim2.new(0.5, -10, 1, 0)
+    dropdownText.Position = UDim2.new(0, 15, 0, 0)
+    dropdownText.BackgroundTransparency = 1
+    dropdownText.Text = text
+    dropdownText.TextColor3 = Theme.Text
+    dropdownText.TextSize = 14
+    dropdownText.TextXAlignment = Enum.TextXAlignment.Left
+    dropdownText.Font = Enum.Font.Gotham
+    dropdownText.Parent = dropdown
+    
+    local dropdownButton = Instance.new("TextButton")
+    dropdownButton.Name = "DropdownButton"
+    dropdownButton.Size = UDim2.new(0.5, -15, 0, 30)
+    dropdownButton.Position = UDim2.new(0.5, 0, 0, 5)
+    dropdownButton.BackgroundColor3 = Theme.Background
+    dropdownButton.Text = default or options[1] or "Select"
+    dropdownButton.TextColor3 = Theme.Text
+    dropdownButton.TextSize = 12
+    dropdownButton.Font = Enum.Font.Gotham
+    dropdownButton.BorderSizePixel = 0
+    dropdownButton.Parent = dropdown
+    
+    CreateCorner(dropdownButton, 6)
+    
+    local currentValue = default or options[1]
+    
+    dropdownButton.MouseButton1Click:Connect(function()
+        -- Create dropdown menu (simplified version)
+        if callback then
+            callback(currentValue)
+        end
+    end)
+    
+    return {
+        Frame = dropdown,
+        SetValue = function(value)
+            currentValue = value
+            dropdownButton.Text = value
+        end,
+        GetValue = function()
+            return currentValue
+        end
+    }
+end
+
+function SolisUI:CreateSlider(tab, text, min, max, default, callback)
+    if not self.Tabs[tab] then return end
+    
+    local slider = Instance.new("Frame")
+    slider.Name = text .. "Slider"
+    slider.Size = UDim2.new(1, 0, 0, 60)
+    slider.BackgroundColor3 = Theme.Secondary
+    slider.BorderSizePixel = 0
+    slider.Parent = self.Tabs[tab].Frame
+    
+    CreateCorner(slider, 8)
+    
+    local sliderText = Instance.new("TextLabel")
+    sliderText.Name = "SliderText"
+    sliderText.Size = UDim2.new(1, -20, 0, 25)
+    sliderText.Position = UDim2.new(0, 15, 0, 5)
+    sliderText.BackgroundTransparency = 1
+    sliderText.Text = text .. ": " .. (default or min)
+    sliderText.TextColor3 = Theme.Text
+    sliderText.TextSize = 14
+    sliderText.TextXAlignment = Enum.TextXAlignment.Left
+    sliderText.Font = Enum.Font.Gotham
+    sliderText.Parent = slider
+    
+    local sliderTrack = Instance.new("Frame")
+    sliderTrack.Name = "SliderTrack"
+    sliderTrack.Size = UDim2.new(1, -30, 0, 6)
+    sliderTrack.Position = UDim2.new(0, 15, 0, 35)
+    sliderTrack.BackgroundColor3 = Theme.Border
+    sliderTrack.BorderSizePixel = 0
+    sliderTrack.Parent = slider
+    
+    CreateCorner(sliderTrack, 3)
+    
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Name = "SliderFill"
+    sliderFill.Size = UDim2.new(0, 0, 1, 0)
+    sliderFill.Position = UDim2.new(0, 0, 0, 0)
+    sliderFill.BackgroundColor3 = Theme.Accent
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderTrack
+    
+    CreateCorner(sliderFill, 3)
+    
+    local sliderHandle = Instance.new("Frame")
+    sliderHandle.Name = "SliderHandle"
+    sliderHandle.Size = UDim2.new(0, 16, 0, 16)
+    sliderHandle.Position = UDim2.new(0, -8, 0, -5)
+    sliderHandle.BackgroundColor3 = Theme.Text
+    sliderHandle.BorderSizePixel = 0
+    sliderHandle.Parent = sliderTrack
+    
+    CreateCorner(sliderHandle, 8)
+    
+    local currentValue = default or min
+    local dragging = false
+    
+    local function updateSlider(value)
+        value = math.clamp(value, min, max)
+        currentValue = value
+        
+        local percentage = (value - min) / (max - min)
+        sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+        sliderHandle.Position = UDim2.new(percentage, -8, 0, -5)
+        sliderText.Text = text .. ": " .. math.floor(value)
+        
+        if callback then
+            callback(value)
+        end
+    end
+    
+    sliderHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
         end
     end)
     
@@ -257,567 +569,121 @@ function PurpleUI:CreateWindow(config)
         end
     end)
     
-    -- Window object
-    local Window = {
-        Frame = mainFrame,
-        Sidebar = sidebar,
-        ContentScroll = contentScroll,
-        ScreenGui = screenGui,
-        Tabs = {},
-        CurrentTab = nil
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = input.Position.X
+            local trackPos = sliderTrack.AbsolutePosition.X
+            local trackSize = sliderTrack.AbsoluteSize.X
+            local percentage = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+            local value = min + (max - min) * percentage
+            updateSlider(value)
+        end
+    end)
+    
+    updateSlider(currentValue)
+    
+    return {
+        Frame = slider,
+        SetValue = updateSlider,
+        GetValue = function()
+            return currentValue
+        end
     }
+end
+
+function SolisUI:MakeDraggable(frame)
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
     
-    -- Create Tab function
-    function Window:CreateTab(config)
-        config = config or {}
-        local tabName = config.Name or "Tab"
-        local tabIcon = config.Icon or "📁"
-        
-        -- Tab Button
-        local tabButton = Instance.new("TextButton")
-        tabButton.Name = tabName
-        tabButton.Size = UDim2.new(1, -10, 0, 35)
-        tabButton.BackgroundColor3 = Theme.BackgroundTertiary
-        tabButton.BackgroundTransparency = 0.3
-        tabButton.BorderSizePixel = 0
-        tabButton.Text = tabIcon .. " " .. tabName
-        tabButton.TextColor3 = Theme.TextSecondary
-        tabButton.TextSize = 12
-        tabButton.TextXAlignment = Enum.TextXAlignment.Left
-        tabButton.Font = Enum.Font.Gotham
-        tabButton.Parent = sidebar
-        
-        CreateCorner(tabButton, 6)
-        
-        -- Tab Content Frame
-        local tabContent = Instance.new("Frame")
-        tabContent.Name = tabName .. "_Content"
-        tabContent.Size = UDim2.new(1, 0, 1, 0)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Visible = false
-        tabContent.Parent = contentScroll
-        
-        local tabLayout = Instance.new("UIListLayout")
-        tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        tabLayout.Padding = UDim.new(0, 8)
-        tabLayout.Parent = tabContent
-        
-        -- Tab object
-        local Tab = {
-            Name = tabName,
-            Button = tabButton,
-            Content = tabContent,
-            Layout = tabLayout,
-            Window = Window
-        }
-        
-        -- Tab selection logic
-        tabButton.MouseButton1Click:Connect(function()
-            -- Hide all tabs
-            for _, tab in pairs(Window.Tabs) do
-                tab.Content.Visible = false
-                tab.Button.BackgroundColor3 = Theme.BackgroundTertiary
-                tab.Button.TextColor3 = Theme.TextSecondary
-            end
-            
-            -- Show selected tab
-            tabContent.Visible = true
-            tabButton.BackgroundColor3 = Theme.Primary
-            tabButton.TextColor3 = Theme.Text
-            Window.CurrentTab = Tab
-            
-            CreateTween(tabButton, {BackgroundColor3 = Theme.Primary}, 0.2)
-        end)
-        
-        -- Hover effects
-        tabButton.MouseEnter:Connect(function()
-            if Window.CurrentTab ~= Tab then
-                CreateTween(tabButton, {BackgroundColor3 = Theme.Secondary}, 0.2)
-            end
-        end)
-        
-        tabButton.MouseLeave:Connect(function()
-            if Window.CurrentTab ~= Tab then
-                CreateTween(tabButton, {BackgroundColor3 = Theme.BackgroundTertiary}, 0.2)
-            end
-        end)
-        
-        -- Add separator after tab (except last)
-        local separator = Instance.new("Frame")
-        separator.Name = "Separator"
-        separator.Size = UDim2.new(1, -20, 0, 1)
-        separator.BackgroundColor3 = Theme.Separator
-        separator.BorderSizePixel = 0
-        separator.Parent = sidebar
-        
-        -- Tab functions
-        function Tab:CreateSection(sectionName)
-            local sectionFrame = Instance.new("Frame")
-            sectionFrame.Name = sectionName
-            sectionFrame.Size = UDim2.new(1, 0, 0, 30)
-            sectionFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            sectionFrame.BackgroundTransparency = 0.2
-            sectionFrame.BorderSizePixel = 0
-            sectionFrame.Parent = tabContent
-            
-            CreateCorner(sectionFrame, 6)
-            CreateStroke(sectionFrame, 1, Theme.Border, 0.8)
-            
-            local sectionLabel = Instance.new("TextLabel")
-            sectionLabel.Size = UDim2.new(1, -15, 1, 0)
-            sectionLabel.Position = UDim2.new(0, 10, 0, 0)
-            sectionLabel.BackgroundTransparency = 1
-            sectionLabel.Text = sectionName
-            sectionLabel.TextColor3 = Theme.Text
-            sectionLabel.TextSize = 13
-            sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
-            sectionLabel.Font = Enum.Font.GothamBold
-            sectionLabel.Parent = sectionFrame
-            
-            return sectionFrame
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
         end
-        
-        function Tab:CreateButton(config)
-            config = config or {}
-            local buttonText = config.Text or "Button"
-            local callback = config.Callback or function() end
-            
-            local buttonFrame = Instance.new("TextButton")
-            buttonFrame.Name = buttonText
-            buttonFrame.Size = UDim2.new(1, 0, 0, 32)
-            buttonFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            buttonFrame.BackgroundTransparency = 0.2
-            buttonFrame.BorderSizePixel = 0
-            buttonFrame.Text = buttonText
-            buttonFrame.TextColor3 = Theme.Text
-            buttonFrame.TextSize = 12
-            buttonFrame.Font = Enum.Font.Gotham
-            buttonFrame.Parent = tabContent
-            
-            CreateCorner(buttonFrame, 6)
-            
-            -- Hover effects
-            buttonFrame.MouseEnter:Connect(function()
-                CreateTween(buttonFrame, {BackgroundColor3 = Theme.Primary}, 0.2)
-            end)
-            
-            buttonFrame.MouseLeave:Connect(function()
-                CreateTween(buttonFrame, {BackgroundColor3 = Theme.BackgroundSecondary}, 0.2)
-            end)
-            
-            buttonFrame.MouseButton1Click:Connect(callback)
-            
-            return buttonFrame
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
-        
-        function Tab:CreateToggle(config)
-            config = config or {}
-            local toggleText = config.Text or "Toggle"
-            local defaultValue = config.Default or false
-            local callback = config.Callback or function() end
-            
-            local toggleFrame = Instance.new("Frame")
-            toggleFrame.Name = toggleText
-            toggleFrame.Size = UDim2.new(1, 0, 0, 32)
-            toggleFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            toggleFrame.BackgroundTransparency = 0.2
-            toggleFrame.BorderSizePixel = 0
-            toggleFrame.Parent = tabContent
-            
-            CreateCorner(toggleFrame, 6)
-            CreateStroke(toggleFrame, 1, Theme.Border, 0.8)
-            
-            local toggleLabel = Instance.new("TextLabel")
-            toggleLabel.Size = UDim2.new(1, -60, 1, 0)
-            toggleLabel.Position = UDim2.new(0, 10, 0, 0)
-            toggleLabel.BackgroundTransparency = 1
-            toggleLabel.Text = toggleText
-            toggleLabel.TextColor3 = Theme.Text
-            toggleLabel.TextSize = 12
-            toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-            toggleLabel.Font = Enum.Font.Gotham
-            toggleLabel.Parent = toggleFrame
-            
-            local toggleButton = Instance.new("TextButton")
-            toggleButton.Size = UDim2.new(0, 40, 0, 18)
-            toggleButton.Position = UDim2.new(1, -45, 0.5, -9)
-            toggleButton.BackgroundColor3 = defaultValue and Theme.Primary or Theme.Secondary
-            toggleButton.BorderSizePixel = 0
-            toggleButton.Text = ""
-            toggleButton.Parent = toggleFrame
-            
-            CreateCorner(toggleButton, 9)
-            
-            local toggleIndicator = Instance.new("Frame")
-            toggleIndicator.Size = UDim2.new(0, 14, 0, 14)
-            toggleIndicator.Position = defaultValue and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
-            toggleIndicator.BackgroundColor3 = Theme.Text
-            toggleIndicator.BorderSizePixel = 0
-            toggleIndicator.Parent = toggleButton
-            
-            CreateCorner(toggleIndicator, 7)
-            
-            local isToggled = defaultValue
-            
-            toggleButton.MouseButton1Click:Connect(function()
-                isToggled = not isToggled
-                
-                CreateTween(toggleButton, {BackgroundColor3 = isToggled and Theme.Primary or Theme.Secondary}, 0.2)
-                CreateTween(toggleIndicator, {Position = isToggled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}, 0.2)
-                
-                callback(isToggled)
-            end)
-            
-            return toggleFrame
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
         end
-        
-        function Tab:CreateSlider(config)
-            config = config or {}
-            local sliderText = config.Text or "Slider"
-            local minValue = config.Min or 0
-            local maxValue = config.Max or 100
-            local defaultValue = config.Default or 50
-            local callback = config.Callback or function() end
-            
-            local sliderFrame = Instance.new("Frame")
-            sliderFrame.Name = sliderText
-            sliderFrame.Size = UDim2.new(1, 0, 0, 45)
-            sliderFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            sliderFrame.BackgroundTransparency = 0.2
-            sliderFrame.BorderSizePixel = 0
-            sliderFrame.Parent = tabContent
-            
-            CreateCorner(sliderFrame, 6)
-            CreateStroke(sliderFrame, 1, Theme.Border, 0.8)
-            
-            local sliderLabel = Instance.new("TextLabel")
-            sliderLabel.Size = UDim2.new(1, -60, 0, 20)
-            sliderLabel.Position = UDim2.new(0, 10, 0, 3)
-            sliderLabel.BackgroundTransparency = 1
-            sliderLabel.Text = sliderText
-            sliderLabel.TextColor3 = Theme.Text
-            sliderLabel.TextSize = 12
-            sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-            sliderLabel.Font = Enum.Font.Gotham
-            sliderLabel.Parent = sliderFrame
-            
-            local valueLabel = Instance.new("TextLabel")
-            valueLabel.Size = UDim2.new(0, 50, 0, 20)
-            valueLabel.Position = UDim2.new(1, -55, 0, 3)
-            valueLabel.BackgroundTransparency = 1
-            valueLabel.Text = tostring(defaultValue)
-            valueLabel.TextColor3 = Theme.Primary
-            valueLabel.TextSize = 12
-            valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-            valueLabel.Font = Enum.Font.GothamBold
-            valueLabel.Parent = sliderFrame
-            
-            local sliderTrack = Instance.new("Frame")
-            sliderTrack.Size = UDim2.new(1, -20, 0, 3)
-            sliderTrack.Position = UDim2.new(0, 10, 1, -12)
-            sliderTrack.BackgroundColor3 = Theme.Secondary
-            sliderTrack.BorderSizePixel = 0
-            sliderTrack.Parent = sliderFrame
-            
-            CreateCorner(sliderTrack, 2)
-            
-            local sliderFill = Instance.new("Frame")
-            sliderFill.Size = UDim2.new((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0)
-            sliderFill.BackgroundColor3 = Theme.Primary
-            sliderFill.BorderSizePixel = 0
-            sliderFill.Parent = sliderTrack
-            
-            CreateCorner(sliderFill, 2)
-            local fillGradient = CreateGradient(sliderFill)
-            AnimateGradient(fillGradient)
-            
-            local sliderButton = Instance.new("TextButton")
-            sliderButton.Size = UDim2.new(0, 12, 0, 12)
-            sliderButton.Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), -6, 0.5, -6)
-            sliderButton.BackgroundColor3 = Theme.Text
-            sliderButton.BorderSizePixel = 0
-            sliderButton.Text = ""
-            sliderButton.Parent = sliderTrack
-            
-            CreateCorner(sliderButton, 6)
-            
-            local currentValue = defaultValue
-            local dragging = false
-            
-            sliderButton.MouseButton1Down:Connect(function()
-                dragging = true
-            end)
-            
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-            
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local mousePos = input.Position.X
-                    local trackPos = sliderTrack.AbsolutePosition.X
-                    local trackSize = sliderTrack.AbsoluteSize.X
-                    
-                    local percentage = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
-                    currentValue = math.floor(minValue + (maxValue - minValue) * percentage)
-                    
-                    valueLabel.Text = tostring(currentValue)
-                    sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-                    sliderButton.Position = UDim2.new(percentage, -6, 0.5, -6)
-                    
-                    callback(currentValue)
-                end
-            end)
-            
-            return sliderFrame
-        end
-        
-        function Tab:CreateDropdown(config)
-            config = config or {}
-            local dropdownText = config.Text or "Dropdown"
-            local options = config.Options or {"Option 1", "Option 2", "Option 3"}
-            local defaultOption = config.Default or options[1]
-            local callback = config.Callback or function() end
-            
-            local dropdownFrame = Instance.new("Frame")
-            dropdownFrame.Name = dropdownText
-            dropdownFrame.Size = UDim2.new(1, 0, 0, 32)
-            dropdownFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            dropdownFrame.BackgroundTransparency = 0.2
-            dropdownFrame.BorderSizePixel = 0
-            dropdownFrame.Parent = tabContent
-            
-            CreateCorner(dropdownFrame, 6)
-            CreateStroke(dropdownFrame, 1, Theme.Border, 0.8)
-            
-            local dropdownLabel = Instance.new("TextLabel")
-            dropdownLabel.Size = UDim2.new(0.4, -10, 1, 0)
-            dropdownLabel.Position = UDim2.new(0, 10, 0, 0)
-            dropdownLabel.BackgroundTransparency = 1
-            dropdownLabel.Text = dropdownText
-            dropdownLabel.TextColor3 = Theme.Text
-            dropdownLabel.TextSize = 12
-            dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
-            dropdownLabel.Font = Enum.Font.Gotham
-            dropdownLabel.Parent = dropdownFrame
-            
-            local dropdownButton = Instance.new("TextButton")
-            dropdownButton.Size = UDim2.new(0.6, -20, 0, 22)
-            dropdownButton.Position = UDim2.new(0.4, 10, 0.5, -11)
-            dropdownButton.BackgroundColor3 = Theme.BackgroundTertiary
-            dropdownButton.BackgroundTransparency = 0.2
-            dropdownButton.BorderSizePixel = 0
-            dropdownButton.Text = defaultOption .. " ▼"
-            dropdownButton.TextColor3 = Theme.Text
-            dropdownButton.TextSize = 11
-            dropdownButton.Font = Enum.Font.Gotham
-            dropdownButton.Parent = dropdownFrame
-            
-            CreateCorner(dropdownButton, 4)
-            CreateStroke(dropdownButton, 1, Theme.Primary, 0.6)
-            
-            local currentOption = defaultOption
-            local isOpen = false
-            
-            dropdownButton.MouseButton1Click:Connect(function()
-                if not isOpen then
-                    isOpen = true
-                    dropdownFrame.Size = UDim2.new(1, 0, 0, 32 + (#options * 22))
-                    
-                    for i, option in ipairs(options) do
-                        local optionButton = Instance.new("TextButton")
-                        optionButton.Name = "Option_" .. i
-                        optionButton.Size = UDim2.new(0.6, -20, 0, 20)
-                        optionButton.Position = UDim2.new(0.4, 10, 0, 32 + ((i-1) * 22))
-                        optionButton.BackgroundColor3 = Theme.BackgroundTertiary
-                        optionButton.BackgroundTransparency = 0.3
-                        optionButton.BorderSizePixel = 0
-                        optionButton.Text = option
-                        optionButton.TextColor3 = Theme.Text
-                        optionButton.TextSize = 10
-                        optionButton.Font = Enum.Font.Gotham
-                        optionButton.Parent = dropdownFrame
-                        
-                        CreateCorner(optionButton, 3)
-                        
-                        optionButton.MouseButton1Click:Connect(function()
-                            currentOption = option
-                            dropdownButton.Text = option .. " ▼"
-                            callback(option)
-                            
-                            -- Close dropdown
-                            for _, child in ipairs(dropdownFrame:GetChildren()) do
-                                if child.Name:match("Option_") then
-                                    child:Destroy()
-                                end
-                            end
-                            dropdownFrame.Size = UDim2.new(1, 0, 0, 32)
-                            isOpen = false
-                        end)
-                        
-                        optionButton.MouseEnter:Connect(function()
-                            CreateTween(optionButton, {BackgroundColor3 = Theme.Primary}, 0.2)
-                        end)
-                        
-                        optionButton.MouseLeave:Connect(function()
-                            CreateTween(optionButton, {BackgroundColor3 = Theme.BackgroundTertiary}, 0.2)
-                        end)
-                    end
-                else
-                    -- Close dropdown
-                    for _, child in ipairs(dropdownFrame:GetChildren()) do
-                        if child.Name:match("Option_") then
-                            child:Destroy()
-                        end
-                    end
-                    dropdownFrame.Size = UDim2.new(1, 0, 0, 32)
-                    isOpen = false
-                end
-            end)
-            
-            return dropdownFrame
-        end
-        
-        function Tab:CreateTextbox(config)
-            config = config or {}
-            local textboxText = config.Text or "Textbox"
-            local placeholder = config.Placeholder or "Enter text..."
-            local callback = config.Callback or function() end
-            
-            local textboxFrame = Instance.new("Frame")
-            textboxFrame.Name = textboxText
-            textboxFrame.Size = UDim2.new(1, 0, 0, 50)
-            textboxFrame.BackgroundColor3 = Theme.BackgroundSecondary
-            textboxFrame.BackgroundTransparency = 0.2
-            textboxFrame.BorderSizePixel = 0
-            textboxFrame.Parent = tabContent
-            
-            CreateCorner(textboxFrame, 6)
-            CreateStroke(textboxFrame, 1, Theme.Border, 0.8)
-            
-            local textboxLabel = Instance.new("TextLabel")
-            textboxLabel.Size = UDim2.new(1, -15, 0, 20)
-            textboxLabel.Position = UDim2.new(0, 10, 0, 3)
-            textboxLabel.BackgroundTransparency = 1
-            textboxLabel.Text = textboxText
-            textboxLabel.TextColor3 = Theme.Text
-            textboxLabel.TextSize = 12
-            textboxLabel.TextXAlignment = Enum.TextXAlignment.Left
-            textboxLabel.Font = Enum.Font.Gotham
-            textboxLabel.Parent = textboxFrame
-            
-            local textbox = Instance.new("TextBox")
-            textbox.Size = UDim2.new(1, -20, 0, 22)
-            textbox.Position = UDim2.new(0, 10, 1, -25)
-            textbox.BackgroundColor3 = Theme.BackgroundTertiary
-            textbox.BackgroundTransparency = 0.2
-            textbox.BorderSizePixel = 0
-            textbox.PlaceholderText = placeholder
-            textbox.PlaceholderColor3 = Theme.TextSecondary
-            textbox.Text = ""
-            textbox.TextColor3 = Theme.Text
-            textbox.TextSize = 11
-            textbox.Font = Enum.Font.Gotham
-            textbox.Parent = textboxFrame
-            
-            CreateCorner(textbox, 4)
-            CreateStroke(textbox, 1, Theme.Primary, 0.6)
-            
-            textbox.FocusLost:Connect(function()
-                callback(textbox.Text)
-            end)
-            
-            return textboxFrame
-        end
-        
-        Window.Tabs[tabName] = Tab
-        
-        -- Auto-select first tab
-        if #Window.Tabs == 1 then
-            tabButton.MouseButton1Click()
-        end
-        
-        return Tab
+    end)
+end
+
+function SolisUI:Destroy()
+    if self.ScreenGui then
+        self.ScreenGui:Destroy()
     end
-    
-    -- Entrance animation
-    mainFrame.Size = UDim2.new(0, 0, 0, 0)
-    CreateTween(mainFrame, {Size = windowSize}, 0.6, Enum.EasingStyle.Back)
-    
-    return Window
 end
 
--- Notification System (Enhanced)
-function PurpleUI:CreateNotification(config)
-    config = config or {}
-    local title = config.Title or "Notification"
-    local description = config.Description or "This is a notification"
-    local duration = config.Duration or 3
-    local notificationType = config.Type or "info"
+-- Example Usage
+local function CreateExampleUI()
+    local ui = SolisUI.new("SolisHub Arise Crossover")
     
-    local notificationGui = Instance.new("ScreenGui")
-    notificationGui.Name = "PurpleUI_Notification"
-    notificationGui.ResetOnSpawn = false
-    notificationGui.Parent = PlayerGui
+    -- Main Tab
+    local mainTab = ui:CreateTab("Main")
+    ui:CreateSection("Main", "Main")
+    ui:CreateToggle("Main", "Anti Fling Mode", false, function(value)
+        print("Anti Fling Mode:", value)
+    end)
+    ui:CreateSlider("Main", "Fly Speed", 1, 100, 16, function(value)
+        print("Fly Speed:", value)
+    end)
+    ui:CreateToggle("Main", "Noclip", false, function(value)
+        print("Noclip:", value)
+    end)
     
-    local notification = Instance.new("Frame")
-    notification.Size = UDim2.new(0, 320, 0, 70)
-    notification.Position = UDim2.new(1, 10, 0, 50)
-    notification.BackgroundColor3 = Theme.BackgroundSecondary
-    notification.BackgroundTransparency = 0.05
-    notification.BorderSizePixel = 0
-    notification.Parent = notificationGui
+    ui:CreateSection("Main", "Teleports")
+    ui:CreateDropdown("Main", "World", {"World 1", "World 2", "World 3", "World 4", "World 5"}, "World 5", function(value)
+        print("Selected World:", value)
+    end)
+    ui:CreateButton("Main", "Teleport To World", function()
+        print("Teleporting to world...")
+    end)
     
-    CreateCorner(notification, 8)
+    ui:CreateSection("Main", "Player Cheats")
+    ui:CreateToggle("Main", "WalkSpeed Toggle", false, function(value)
+        print("WalkSpeed Toggle:", value)
+    end)
+    ui:CreateToggle("Main", "JumpPower Toggle", false, function(value)
+        print("JumpPower Toggle:", value)
+    end)
     
-    local strokeColor = Theme.Primary
-    if notificationType == "success" then strokeColor = Theme.Success
-    elseif notificationType == "warning" then strokeColor = Theme.Warning
-    elseif notificationType == "error" then strokeColor = Theme.Error end
+    ui:CreateSection("Main", "Anti Afk")
+    ui:CreateButton("Main", "Reset Character", function()
+        if Player.Character then
+            Player.Character:BreakJoints()
+        end
+    end)
+    ui:CreateButton("Main", "Rejoin", function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+    end)
     
-    CreateStroke(notification, 2, strokeColor, 0.2)
+    -- Settings Tab
+    local settingsTab = ui:CreateTab("Settings")
+    ui:CreateSection("Settings", "UI Settings")
+    ui:CreateToggle("Settings", "Auto Save Config", true, function(value)
+        print("Auto Save Config:", value)
+    end)
+    ui:CreateSlider("Settings", "UI Scale", 0.5, 2, 1, function(value)
+        print("UI Scale:", value)
+    end)
+    ui:CreateButton("Settings", "Reset to Defaults", function()
+        print("Resetting to defaults...")
+    end)
     
-    local notifGradient = CreateGradient(notification, ColorSequence.new{
-        ColorSequenceKeypoint.new(0, strokeColor),
-        ColorSequenceKeypoint.new(0.5, Theme.BackgroundSecondary),
-        ColorSequenceKeypoint.new(1, strokeColor)
-    }, 45)
-    AnimateGradient(notifGradient)
-    
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -15, 0, 22)
-    titleLabel.Position = UDim2.new(0, 10, 0, 5)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title
-    titleLabel.TextColor3 = Theme.Text
-    titleLabel.TextSize = 13
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.Parent = notification
-    
-    local descLabel = Instance.new("TextLabel")
-    descLabel.Size = UDim2.new(1, -15, 0, 35)
-    descLabel.Position = UDim2.new(0, 10, 0, 25)
-    descLabel.BackgroundTransparency = 1
-    descLabel.Text = description
-    descLabel.TextColor3 = Theme.TextSecondary
-    descLabel.TextSize = 11
-    descLabel.TextXAlignment = Enum.TextXAlignment.Left
-    descLabel.TextYAlignment = Enum.TextYAlignment.Top
-    descLabel.TextWrapped = true
-    descLabel.Font = Enum.Font.Gotham
-    descLabel.Parent = notification
-    
-    -- Slide in animation
-    CreateTween(notification, {Position = UDim2.new(1, -330, 0, 50)}, 0.5, Enum.EasingStyle.Back)
-    
-    -- Auto-close
-    wait(duration)
-    CreateTween(notification, {Position = UDim2.new(1, 10, 0, 50)}, 0.3)
-    wait(0.3)
-    notificationGui:Destroy()
+    return ui
 end
 
-return PurpleUI
+-- Initialize the UI
+SolisUI.Create = CreateExampleUI
+
+return SolisUI
